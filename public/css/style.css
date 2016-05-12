@@ -1,0 +1,161 @@
+
+#menuBar{
+  width:100%;
+  margin:auto;
+  background-color: #C0FFFF;  
+}
+
+#gameZone{
+  width:70%;
+  margin:auto;
+  /*background-color: #E6E6E6;*/
+}
+
+#opponentChoice{
+  display:inline-block;
+  width:30%;
+  background-color: #A6A5C9;
+  vertical-align: top;
+}
+
+#mask{
+  display:inline-block;
+  width:50%;
+  /*background-color: #FFA858;*/
+  text-align: center;
+  vertical-align: top;
+  position:absolute;
+  z-index:2;
+  cursor:pointer;
+}
+
+#tokens{
+  display:inline-block;
+  width:50%;
+  /*background-color: #FFA858;*/
+  text-align: center;
+  vertical-align: top;
+  position:absolute;
+  z-index:1;
+}
+
+
+.column{
+  display:inline-block;
+  width:14%;
+  /*background-color: #FFC0FF;*/
+}
+
+.square{
+/*  background-image: url(../images/board.svg);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;*/
+  position:relative;
+  width:100%;
+  padding-bottom: 100%;
+  /*overflow:hidden;*/
+  /*margin:1%;*/
+  text-align:center;
+ /* z-index:0;*/
+}
+
+.boardImg{
+  position:absolute;
+  background-image: url(../images/board.svg);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  width:100%;
+  padding-bottom: 100%;
+  /*overflow:hidden;*/
+  /*margin:1%;*/
+  text-align:center;
+  /*z-index:2;*/
+}
+
+.noToken{
+  z-index:1;
+  width:100%;
+  height:100%;
+  border-radius:100%;
+  position:absolute;
+}
+
+.redToken{
+  background-color: #FF0000;
+  z-index:1;
+  width:90%;
+  height:90%;
+  top:5%;
+  left:5%;
+  border-radius:90%;
+  position:absolute
+}
+
+.blueToken{
+  background-color: #0000FF;
+  z-index:1;
+  width:90%;
+  height:90%;
+  top:5%;
+  left:5%;
+  border-radius:90%;
+  position:absolute
+}
+
+.cross{
+  position:absolute;
+  z-index:3;
+  color:white;
+  text-align: center; 
+  width:50%;
+  height:50%;
+  top: 50%;
+  left:50%;
+  -webkit-transform: translate(-50%,-50%);
+     -moz-transform: translate(-50%,-50%);
+      -ms-transform: translate(-50%,-50%);
+       -o-transform: translate(-50%,-50%);
+          transform: translate(-50%,-50%);
+}
+
+#next-turn{
+  float:left;
+  margin-left:4px;
+}
+
+.smallNoToken{
+  display: inline-block;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border: 1px dotted #A6A5C9;
+  border-radius: 20px;
+  margin-left: 5px;
+  position: relative;
+  top: 5px;
+  left: 3px;  
+}
+
+.smallRedToken{
+  display: inline-block;
+  background-color: #FF0000;
+  z-index:1;
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  position: relative;
+  top: 5px;
+  left: 3px;    
+}
+
+.smallBlueToken{
+  display: inline-block;
+  background-color: #0000FF;
+  z-index:1;
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  position: relative;
+  top: 5px;
+  left: 3px;  
+}

@@ -1,0 +1,28 @@
+{
+  "name": "connect-four",
+  "version": "0.0.0",
+  "description": "Code from a simple connect four game with react.",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.4.3",
+    "express": "^4.4.5",
+    "socket.io": "~1.3.4"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "react",
+    "socket.io",
+    "connect four"
+  ],
+  "author": "Felix DEBON"
+}
