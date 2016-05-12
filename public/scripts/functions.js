@@ -22,7 +22,6 @@ var connec4Fct = {
     return array[index];
   },
   
-
   /**
    * For each of the scores array we determine where it appears (positions) and how often
    * and then a decreasing sort is made on the score value
@@ -99,7 +98,8 @@ var connec4Fct = {
         var lastMove = connec4Fct.addToken(game, columnPlayed);
 
         //we update the game state
-        _this.setState({ game : game });
+        _this.forceUpdate();    
+        //_this.setState({ game : game });
 
         var win = connec4Fct.testWin(game, lastMove);
 
@@ -111,8 +111,8 @@ var connec4Fct = {
           game.turn = 2;
           //this.state.game.turn = 2;             
         }
-        _this.setState({ game : game }); 
-
+        //_this.setState({ game : game }); 
+        _this.forceUpdate();    
       }.bind(_this),
       error: function(xhr, status, err) {
         console.error(_this.props.url, status, err.toString());

@@ -12,11 +12,10 @@ var MenuBar = React.createClass({
 });
 
 var GameZone = React.createClass({
-
   render: function() {
     return (
       <div id="gameZone">
-        <OpponentChoice  winner={this.props.game.winner} level={this.props.game.level} />
+        <SettingZone game={this.props.game} onUserclickLevel={this.props.onUserclickLevel} />
         <Mask game={this.props.game} onUserClick={this.props.onUserclick} />
         <Tokens game={this.props.game} />
       </div>
@@ -24,21 +23,47 @@ var GameZone = React.createClass({
   }
 });
 
-var OpponentChoice = React.createClass({
+var SettingZone = React.createClass({
+  handleChange: function(event) {
+    //alert(event.currentTarget.value);
+    this.props.onUserclickLevel(event.currentTarget.value);
+  },   
   render: function() {
     var style = {};
     //style.display = 'none';
     return (
-      <div id="opponentChoice">
-        <p style={style}>ChooseOponent zone</p>
-        <p>Level:  {this.props.level}</p>
+      <div id="settingZone">
+        <h1 style={style}>Setting</h1>
+        <p>Current level: <b>{this.props.game.level}</b></p>
+        <form action="" >
+          <div className="block">
+            <input type="radio" checked={this.props.game.level === "very easy"} name="level" value="very easy" onChange={this.handleChange} />
+            very easy
+          </div>
+          <div className="block">
+            <input type="radio" checked={this.props.game.level === "easy"} name="level" value="easy" onChange={this.handleChange}/>
+            easy
+          </div>
+          <div className="block">
+            <input type="radio" checked={this.props.game.level === "normal"} name="level" value="normal" onChange={this.handleChange}/>
+            normal
+          </div>
+          <div className="block">
+            <input type="radio" checked={this.props.game.level === "hard"} name="level" value="hard" onChange={this.handleChange}/>
+            hard
+          </div>
+          <div className="block">
+            <input type="radio" checked={this.props.game.level === "very hard"} name="level" value="very hard" onChange={this.handleChange}/>
+            very hard
+          </div>
+        </form>
         <button type="button" onClick={this.play}>Play</button> 
-        <p>winner: {this.props.winner}</p>
+        <p>winner: {this.props.game.winner}</p>
       </div>
     );
   }
 });
-
+ 
 
 var Mask = React.createClass({
 
@@ -185,14 +210,16 @@ var Connect4 = React.createClass({
   },  
 
   getInitialState: function() {
-    var firstPlayer = 1 + Math.floor(2*Math.random());// 1 or 2 randomly
+    var firstPlayer = 1 + Math.floor(2*Math.random());// 1 or 2 random
     //firstPlayer = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     console.log("firstPlayer:",firstPlayer);
    
     return {
+
       game: { 
+        gameInProgress: false,
         url:"http://connect4.gamesolver.org/solve?",
-        level:"very easy",
+        level:"easy",
         players:[
           { name:"IA", id:1 , className:"redToken"},
           { name:"Guest", id:2, className:"blueToken" }
@@ -228,10 +255,10 @@ var Connect4 = React.createClass({
 
     if ( this.state.game.turn === 2 ){//if user is allowed to play 
      
-      var game = _.clone(this.state.game);
+      //var game = _.clone(this.state.game);
 
       //the user plays
-      var lastMove = connec4Fct.addToken(game, col);
+      var lastMove = connec4Fct.addToken(this.state.game, col);
 
       if ( !lastMove ){ 
         alert("This column is full!");
@@ -241,86 +268,47 @@ var Connect4 = React.createClass({
       console.log('lastMove=',lastMove); //console.log('game=',game); 
      
       //The move is valid so we update the game state
-      this.setState({ game : game });  
-
+      //this.setState({ game : game });  
+      this.forceUpdate();
       //it is a winning move ?
-      var win = connec4Fct.testWin(game, lastMove);
+      var win = connec4Fct.testWin(this.state.game, lastMove);
 
       if ( win ){
-        game.winner = 2;
-        game.turn = 0;     
-        this.setState({ game : game });
+        this.state.game.winner = 2;
+        this.state.game.turn = 0;
+        this.forceUpdate();     
+        //this.setState({ game : game });
         alert("You win!");
       }else{
         //IA'S turn to play
-        game.turn = 1;
+        this.state.game.turn = 1;
       
         //console.log("position=",game.position);
         //get actual connect 4 game position in string notation       
-        var pos = connec4Fct.arrayToString(game.position);
+        var pos = connec4Fct.arrayToString(this.state.game.position);
         //console.log("pos=",pos);
 
-        connec4Fct.computerMove(this, game, pos);
-        
-
         //get the solution with Pascal Pons "alpha beta pruning" algorithm 
-        // $.ajax({
-        //   url: game.url,
-        //   data:{pos:pos},
-        //   dataType: 'json',
-        //   cache: false,
-        //   success: function(data) {
-        //     console.log("data:",data);
-        //     var array = data.score;
-          
-        //     var stat = connec4Fct.getArrayStat(array);
-        //     var n = stat.length;
-        //     //alert(n);
-        //     console.log('stat:',stat);
-        //     var columnPlayed;
-
-        //     console.log("easy and nb choice " + n + ": "+connec4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
-        //     //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-        //     var rank = connec4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
-
-        //     //columnPlayed = connec4Fct.getRandomElementInArray(stat[n-1].positions);
-        //     columnPlayed = connec4Fct.getRandomElementInArray(stat[rank].positions);
-           
-        //     var lastMove = connec4Fct.addToken(game, columnPlayed);
-
-        //     //we update the game state
-        //     this.setState({ game : game });
-
-        //     var win = connec4Fct.testWin(game, lastMove);
-
-        //     if ( win ){//computer win
-        //       game.winner = 1;
-        //       game.turn = 0;     
-        //       alert("You loose!");
-        //     }else{//pass turn to user
-        //       game.turn = 2;
-        //       //this.state.game.turn = 2;             
-        //     }
-        //     this.setState({ game : game }); 
-
-        //   }.bind(this),
-        //   error: function(xhr, status, err) {
-        //     console.error(this.props.url, status, err.toString());
-        //   }.bind(this)
-        // });
-
-
+        connec4Fct.computerMove(this, this.state.game, pos);
+        
       }
     }else{
         alert("It's not your turn...");
     }
   },
 
+  handleUserChangeLevel: function(value) {
+    //alert(value);
+    this.state.game.level = value;
+    this.forceUpdate();
+    //this.setState({ game : game });
+  },
+
   render: function() {
     return (
       <div>
         <MenuBar />
-        <GameZone game={this.state.game} onUserclick={this.handleUserClick} />
+        <GameZone game={this.state.game} onUserclick={this.handleUserClick} onUserclickLevel={this.handleUserChangeLevel}/>
       </div>
     );
   }

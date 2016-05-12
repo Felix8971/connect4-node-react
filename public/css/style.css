@@ -11,7 +11,7 @@
   /*background-color: #E6E6E6;*/
 }
 
-#opponentChoice{
+#settingZone{
   display:inline-block;
   width:30%;
   background-color: #A6A5C9;
@@ -158,4 +158,8 @@
   position: relative;
   top: 5px;
   left: 3px;  
+}
+
+.block{
+  display:block;
 }
