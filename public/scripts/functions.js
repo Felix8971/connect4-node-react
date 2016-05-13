@@ -1,4 +1,4 @@
-//Add new token on connect4's board
+//Add new disc on connect4's grid
 var connec4Fct = {
   
   arrayToString: function(array){
@@ -21,14 +21,48 @@ var connec4Fct = {
     var index = this.getRandomIntInclusive(0,n-1);
     return array[index];
   },
-  
+
+  game: function(level){
+        this.level = level || "normal";
+        this.nbMove = 0;
+        this.winner = null;
+        this.gameInProgress = false;
+        this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 random
+        this.classNames = ["noDisc","redDisc","blueDisc"];
+        this.url = "http://connect4.gamesolver.org/solve?";
+        this.players = [
+          { name:"IA", id:1 , className:"redDisc"},
+          { name:"Guest", id:2, className:"blueDisc" }
+        ];
+
+        this.position = [];//list of column's numbers successively played, first column is 1
+        this.grid = [//game map
+          [0, 0, 0, 0, 0, 0],//first column (grid's top first)
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+        ];
+        this.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+        ];
+  },
+
   /**
    * For each of the scores array we determine where it appears (positions) and how often
    * and then a decreasing sort is made on the score value
   **/
   getArrayStat: function(array){
     //var array = [2,2,3,15,6,100,100];
-    console.log('array:',array);
+    //console.log('array:',array);
     var n = array.length;
 
     var stat = {};
@@ -44,14 +78,14 @@ var connec4Fct = {
       }
     }
 
-    console.log('stat:',stat);
+    //console.log('stat:',stat);
     var statSorted =_.sortBy(stat, 'value').reverse();
-    console.log('statSorted:',statSorted);
+    //console.log('statSorted:',statSorted);
     return statSorted;
   },
 
   /**
-   *  Dans le tableau retourné parconnec4Fct.getArrayStat() cette fonction donne l'indice à choisir pour jouer   
+   *  Dans le tableau retourné parconnec4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
    *  en fonction du niveau de jeu et du nombre de choix possibles
   **/  
   getRankToPLayFromLevelAndNbrChoices : {
@@ -66,8 +100,10 @@ var connec4Fct = {
     * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
     * and make the computer play 
   **/
-  computerMove: function(_this, game, pos){
-    
+  computerMove: function(_this){
+    var game = _this.state.game;
+    var pos = connec4Fct.arrayToString(game.position);
+
     $.ajax({
       url: game.url,
       data:{pos:pos},
@@ -88,26 +124,31 @@ var connec4Fct = {
         console.log('stat:',stat);
         var columnPlayed;
 
-        console.log("easy and nb choice " + n + ": "+connec4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+        //console.log("easy and nb choice " + n + ": "+connec4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
         //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
         var rank = connec4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
 
         //columnPlayed = connec4Fct.getRandomElementInArray(stat[n-1].positions);
         columnPlayed = connec4Fct.getRandomElementInArray(stat[rank].positions);
        
-        var lastMove = connec4Fct.addToken(game, columnPlayed);
-
+        var lastMove = connec4Fct.addDisc(game, columnPlayed);
+        game.nbMove++;
+        
         //we update the game state
         _this.forceUpdate();    
         //_this.setState({ game : game });
 
         var win = connec4Fct.testWin(game, lastMove);
 
+
         if ( win ){//computer win
           game.winner = 1;
           game.turn = 0;     
           alert("You loose!");
         }else{//pass turn to user
+          if ( this.state.game.nbMove == 42 ){
+            alert("draw 0-0 !");
+          }
           game.turn = 2;
           //this.state.game.turn = 2;             
         }
@@ -122,35 +163,35 @@ var connec4Fct = {
   },
 
   /**
-   * Try to add token on the game's board  
-   * if it's possible we update the games matrix, the position and the turn
+   * Try to add disc on the game's grid  
+   * if it's possible we update the games grid, the position and the turn
   **/  
-  addToken: function(game, col){
-    var canAddToken = false;
+  addDisc: function(game, col){
+    var canAddDisc = false;
     //we go from bottom to top of connect4's board searching for a free cell (with column=col)
     for(var line=5;line>=0;line--){
-      if ( game.matrix[col][line] === 0 && line >= 0){
-        canAddToken = true;
-        game.matrix[col][line] = game.turn;
+      if ( game.grid[col][line] === 0 && line >= 0){
+        canAddDisc = true;
+        game.grid[col][line] = game.turn;
         game.position.push(col+1);//+1 because first column start by 1 in string notation and not 0            
         return {col:col,line:line, turn:game.turn};
       }
     }
-    if ( !canAddToken ){ 
+    if ( !canAddDisc ){ 
       return false;
     }        
   },
 
    //Check if the last move win 
-  testWin: function(game, lastMove){//if optionCheck is true we check the aligned token
+  testWin: function(game, lastMove){//if optionCheck is true we check the aligned discs
 
     var test_alignment_EW = function(game, lastMove, optionCheck){
-      var nbAlignedToken = 1;
+      var nbAlignedDisc = 1;
       //horizontal right direction
       for(var k=1;k<=3;k++){
         if ( lastMove.col+k < 7 ){
-          if ( game.matrix[lastMove.col+k][lastMove.line+0] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col+k][lastMove.line+0] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col+k][lastMove.line+0] = true;
             }
@@ -163,8 +204,8 @@ var connec4Fct = {
       //horizontal left direction
       for(var k=1;k<=3;k++){
         if ( lastMove.col-k >= 0 ){
-          if ( game.matrix[lastMove.col-k][lastMove.line+0] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col-k][lastMove.line+0] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col-k][lastMove.line+0] = true;
             }            
@@ -175,7 +216,7 @@ var connec4Fct = {
       }
 
       //count both direction
-      if ( nbAlignedToken >= 4 ){//yes it can be > 4 !
+      if ( nbAlignedDisc >= 4 ){//yes it can be > 4 !
         return true;
       }
 
@@ -190,12 +231,12 @@ var connec4Fct = {
     }
 
     var test_alignment_NS = function(game, lastMove, optionCheck){
-      var nbAlignedToken = 1;
+      var nbAlignedDisc = 1;
       //vertical down
       for(var k=1;k<=3;k++){
         if ( lastMove.line + k < 6 ){
-          if ( game.matrix[lastMove.col+0][lastMove.line + k] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col+0][lastMove.line + k] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col+0][lastMove.line + k] = true;
             }             
@@ -207,7 +248,7 @@ var connec4Fct = {
       //vertical up doesn't need to be checked (it will always be empty due to gravity effect)
       
       //count 
-      if ( nbAlignedToken >= 4 ){
+      if ( nbAlignedDisc >= 4 ){
         return true;
       }
     }
@@ -221,12 +262,12 @@ var connec4Fct = {
 
 
     var test_alignment_NW = function(game, lastMove, optionCheck){
-      var nbAlignedToken = 1;
+      var nbAlignedDisc = 1;
       //toward North/west 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col - k >= 0) && (lastMove.line - k >= 0) ){
-          if ( game.matrix[lastMove.col-k][lastMove.line - k] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col-k][lastMove.line - k] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col - k][lastMove.line- k] = true;
             }             
@@ -239,8 +280,8 @@ var connec4Fct = {
       //toward South/Est 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col + k < 7 ) && (lastMove.line + k < 6 ) ){
-          if ( game.matrix[lastMove.col + k][lastMove.line + k] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col + k][lastMove.line + k] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col + k][lastMove.line + k] = true;
             }              
@@ -251,7 +292,7 @@ var connec4Fct = {
       } 
 
       //count 
-      if ( nbAlignedToken >= 4 ){
+      if ( nbAlignedDisc >= 4 ){
         return true;
       }
     }
@@ -265,12 +306,12 @@ var connec4Fct = {
 
 
     var test_alignment_NE = function(game, lastMove, optionCheck){    
-      var nbAlignedToken = 1;
+      var nbAlignedDisc = 1;
       //toward North/Est 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col + k < 7 ) && (lastMove.line - k >= 0 ) ){
-          if ( game.matrix[lastMove.col + k][lastMove.line - k] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col + k][lastMove.line - k] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col + k][lastMove.line - k] = true;
             }             
@@ -283,8 +324,8 @@ var connec4Fct = {
       //toward South/West 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col - k >= 0 ) && (lastMove.line + k < 6 ) ){
-          if ( game.matrix[lastMove.col - k][lastMove.line + k] === lastMove.turn){
-            nbAlignedToken++;
+          if ( game.grid[lastMove.col - k][lastMove.line + k] === lastMove.turn){
+            nbAlignedDisc++;
             if ( optionCheck ){
               game.aligned[lastMove.col - k][lastMove.line + k] = true;
             }             
@@ -295,7 +336,7 @@ var connec4Fct = {
       }   
 
       //count 
-      if ( nbAlignedToken >= 4 ){
+      if ( nbAlignedDisc >= 4 ){
         return true;
       }
     }
@@ -305,6 +346,8 @@ var connec4Fct = {
       game.aligned[lastMove.col][lastMove.line] = true; 
       return true;
     }
-  }
+  },
+
+
 
 };

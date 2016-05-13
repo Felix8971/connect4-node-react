@@ -29,7 +29,7 @@
   cursor:pointer;
 }
 
-#tokens{
+#grid{
   display:inline-block;
   width:50%;
   /*background-color: #FFA858;*/
@@ -72,7 +72,7 @@
   /*z-index:2;*/
 }
 
-.noToken{
+.noDisc{
   z-index:1;
   width:100%;
   height:100%;
@@ -80,7 +80,7 @@
   position:absolute;
 }
 
-.redToken{
+.redDisc{
   background-color: #FF0000;
   z-index:1;
   width:90%;
@@ -91,7 +91,7 @@
   position:absolute
 }
 
-.blueToken{
+.blueDisc{
   background-color: #0000FF;
   z-index:1;
   width:90%;
@@ -123,7 +123,7 @@
   margin-left:4px;
 }
 
-.smallNoToken{
+.smallNoDisc{
   display: inline-block;
   z-index: 1;
   width: 20px;
@@ -136,7 +136,7 @@
   left: 3px;  
 }
 
-.smallRedToken{
+.smallRedDisc{
   display: inline-block;
   background-color: #FF0000;
   z-index:1;
@@ -148,7 +148,7 @@
   left: 3px;    
 }
 
-.smallBlueToken{
+.smallBlueDisc{
   display: inline-block;
   background-color: #0000FF;
   z-index:1;
@@ -162,4 +162,7 @@
 
 .block{
   display:block;
+}
+.wait{
+  margin-left: 5px;
 }
