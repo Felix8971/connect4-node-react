@@ -1,5 +1,5 @@
 # connect4-node-react
-Connect 4 game implemented with React with NodeJS
+Connect 4 game implemented with React and NodeJS
 
 ### Pre-requirements
 - node & npm
