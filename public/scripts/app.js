@@ -1,11 +1,11 @@
 var MenuBar = React.createClass({
   render: function() {
     return (
-      <ul id="menuBar">
-        <li>Menu</li>
-        <li>Inscription</li>
-        <li>Connexion</li>
-      </ul>
+      <div id="menuBar">
+        <h1>Connect 4</h1>
+        <a href="url" className="link">ABOUT</a>
+        <a href="url" className="link">CREDITS</a>
+      </div>
     );
   }
 });
@@ -14,41 +14,55 @@ var GameZone = React.createClass({
   render: function() {
     return (
       <div id="gameZone">
-        <SettingZone game={this.props.game} onUserclickLevel={this.props.onUserclickLevel} />
-        <Mask game={this.props.game} onUserClick={this.props.onUserclick} />
-        <Grid game={this.props.game} />
+          <MenuBar/>
+          <SettingZone game={this.props.game} onUserclickLevel={this.props.onUserclickLevel} />        
+          <Mask game={this.props.game} onUserClick={this.props.onUserclick} />
+          <Grid game={this.props.game} />
       </div>
     );
   }
 });
 
 var SettingZone = React.createClass({
-  handleChange: function(event) {
-    //alert(event.currentTarget.value);
-    this.props.onUserclickLevel(event.currentTarget.value);
-  },   
+  // handleChange: function(event) {
+  //   alert(event.currentTarget.value);
+  //   this.props.onUserclickLevel(event.currentTarget.value);
+  // },  
+  //<input className="input-level" type="radio" value={level} checked={this.props.game.level === level } name="level" onChange={this.handleChange}/>
+  handleClick: function(event) {
+    console.log(event.currentTarget.id);
+    this.props.onUserclickLevel(event.currentTarget.id);
+
+    //retirer classe selected à tous les level-block
+    //attribuer class selected à event.currentTarget
+    //event.currentTarget.className += "selected";
+    //document.getElementsByClassName("level-block").classList.remove('selected');
+    //document.getElementById(event.currentTarget.id).className += " selected";
+  },    
   render: function() {
     var style = {};
     var levelRows = [];
     for (var level in connec4Fct.getRankToPLayFromLevelAndNbrChoices) {
+       var img = "../../images/" + connec4Fct.imageFromLevel[level];
+       var className = this.props.game.level === level ? 'level-block selected' :   'level-block';
        levelRows.push( 
-        <div key={level} >
-          <input type="radio" value={level} checked={this.props.game.level === level } name="level"  onChange={this.handleChange}/> {level}
+        <div key={level} className={className} id={level} onClick={this.handleClick}>
+          <div className="robotFrame">
+            <img className="level-img" src={img}/>
+          </div>
+          <div className="info">{level}</div>
         </div>
       );   
     }
     //style.display = 'none';
     return (
       <div id="settingZone">
-        <h1 style={style}>Setting</h1>
-        <p>Current level: <b>{this.props.game.level}</b></p>
+        <div className="title">Choose difficulty</div>
         <form action="" >
           <div className="block">
             {levelRows}
           </div>
         </form>
-        <button type="button" onClick={this.play}>Play</button> 
-        <p>winner: {this.props.game.winner}</p>
       </div>
     );
   }
@@ -81,6 +95,8 @@ var Mask = React.createClass({
         {columns}
         <NextTurnDisplay 
           turn={this.props.game.turn} 
+          level={this.props.game.level} 
+          winner={this.props.game.winner}
           classNames={this.props.game.classNames}  />      
       </div>
       
@@ -115,9 +131,15 @@ var NextTurnDisplay = React.createClass({
     var classNames = ["smallNoDisc","smallRedDisc","smallBlueDisc"];
     var turn = this.props.turn;
     return (
-      <div id="next-turn">Next turn: 
-        <div className={classNames[turn]}></div>{turn === 1 ? <span className="wait">Please wait...</span> : null}
-      </div>
+      <div>
+        <div id="next-turn">Next turn: 
+          <div className={classNames[turn]}></div>{turn === 1 ? <span className="wait">Please wait...</span> : null}
+        </div>
+        <div id="difficulty">Difficulty: {this.props.level}</div>
+        <div id="winner">Winner: 
+          <div className={classNames[this.props.winner]}></div>
+        </div>
+      </div>      
     );
   }
 });
@@ -162,6 +184,7 @@ var ColumnGrid = React.createClass({
       var id = col.toString()+"-"+line.toString();
       var idSquare = "square-"+id;
       var idDisc = "disc-"+id;
+
       return (
         <div className="square" key={idDisc} id={idSquare} >
           <div  id={idDisc} className={classNames[square]}></div>
@@ -235,7 +258,7 @@ var Connect4 = React.createClass({
             var pos = connec4Fct.arrayToString(this.state.game.position);
             //console.log("pos=",pos);
 
-            //get the solution with Pascal Pons "alpha beta pruning" algorithm 
+            //get the solution from Pascal Pons "alpha beta pruning" algorithm 
             connec4Fct.computerMove(this);
           }            
           break;
@@ -246,19 +269,19 @@ var Connect4 = React.createClass({
           var rep = confirm("Play again ?");
           if (rep){
             var self = this;
-            //Rem: setState work asynchronously we need to use a callback:
+            //Rem: setState works asynchronously so we need to use a callback:
             this.setState({ game : new connec4Fct.game(this.state.game.level) }, function(){
               console.log("turn:",self.state.game.turn);
               if ( self.state.game.turn === 1 ){//faire jouer la machine    
                 connec4Fct.computerMove(self);
               }else{
-                //no code here because this.handleUserClick() will be call on the click event
+                //no code here because this.handleUserClick() will be called on the click event
               }
             });
           }
           break;
         default:
-          alert("pb");
+          alert("an error");
     } 
   },
 
@@ -271,8 +294,7 @@ var Connect4 = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <MenuBar/>
+      <div id="container">
         <GameZone game={this.state.game} onUserclick={this.handleUserClick} onUserclickLevel={this.handleUserChangeLevel}/>
       </div>
     );

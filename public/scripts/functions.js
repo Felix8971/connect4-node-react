@@ -25,7 +25,7 @@ var connec4Fct = {
   game: function(level){
         this.level = level || "normal";
         this.nbMove = 0;
-        this.winner = null;
+        this.winner = 0;
         this.gameInProgress = false;
         this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 random
         this.classNames = ["noDisc","redDisc","blueDisc"];
@@ -68,7 +68,7 @@ var connec4Fct = {
     var stat = {};
 
     for(var i=0;i<n;i++){
-      if ( array[i] != 100 ){//full column 
+      if ( array[i] != 100 ){//score of 100 on a column means that the column is full. 
         if ( !stat[array[i]] ){
           stat[array[i]] = {occurrence: 1, positions:[i], value:array[i]};
         }else{
@@ -94,6 +94,15 @@ var connec4Fct = {
     "normal":   [0,0,0,1,2,3,4],        
     "hard":     [0,0,0,0,1,2,3],
     "very hard":[0,0,0,0,0,0,0],   
+  },
+
+
+  imageFromLevel : {
+    "very easy":"very_easy.png",//nb choix 1 => 0, nb choix 2 => 1, nb choix 3 => 2, 
+    "easy":     "r2d2.png",
+    "normal":   "6po.png",
+    "hard":     "terminator.png",
+    "very hard":"hal.png",
   },
 
   /**
@@ -163,8 +172,8 @@ var connec4Fct = {
   },
 
   /**
-   * Try to add disc on the game's grid  
-   * if it's possible we update the games grid, the position and the turn
+   * Try to add a disc on the game's grid  
+   * if it's possible we update the game object
   **/  
   addDisc: function(game, col){
     var canAddDisc = false;
@@ -173,7 +182,7 @@ var connec4Fct = {
       if ( game.grid[col][line] === 0 && line >= 0){
         canAddDisc = true;
         game.grid[col][line] = game.turn;
-        game.position.push(col+1);//+1 because first column start by 1 in string notation and not 0            
+        game.position.push(col+1);//+1 because first column start by 1 in string notation, not 0.            
         return {col:col,line:line, turn:game.turn};
       }
     }
@@ -182,12 +191,28 @@ var connec4Fct = {
     }        
   },
 
-   //Check if the last move win 
-  testWin: function(game, lastMove){//if optionCheck is true we check the aligned discs
+  // test_generic : function(use1, a , b, use2, c, d, e, f, game, lastMove, optionCheck){
+  //   for(var k=1;k<=3;k++){
+  //     if ( (use1 || (lastMove.col + a*k >= b)) && (use2 || (lastMove.line + c*k >= d)) ){
+  //       if ( game.grid[lastMove.col + e*k][lastMove.line + f*k] === lastMove.turn){
+  //         nbAlignedDisc++;
+  //         if ( optionCheck ){
+  //           game.aligned[lastMove.col + e*k][lastMove.line + f*k] = true;
+  //         }             
+  //       }else{
+  //         break;
+  //       }
+  //     }
+  //   } 
+  // },
 
+  //Check if the last move win (four pieces connected)
+  testWin: function(game, lastMove){//if optionCheck is true we record the aligned discs in game.aligned matrix
+    
     var test_alignment_EW = function(game, lastMove, optionCheck){
       var nbAlignedDisc = 1;
       //horizontal right direction
+      //connec4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
       for(var k=1;k<=3;k++){
         if ( lastMove.col+k < 7 ){
           if ( game.grid[lastMove.col+k][lastMove.line+0] === lastMove.turn){
@@ -200,7 +225,9 @@ var connec4Fct = {
           }
         }
       }
-
+      //console.log('nbAlignedDisc:'+nbAlignedDisc);
+      //connec4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
+      
       //horizontal left direction
       for(var k=1;k<=3;k++){
         if ( lastMove.col-k >= 0 ){
@@ -214,12 +241,11 @@ var connec4Fct = {
           }
         }
       }
-
+      //console.log('nbAlignedDisc:'+nbAlignedDisc);
       //count both direction
       if ( nbAlignedDisc >= 4 ){//yes it can be > 4 !
         return true;
       }
-
     }
 
 
@@ -259,6 +285,7 @@ var connec4Fct = {
       game.aligned[lastMove.col][lastMove.line] = true; 
       return true;
     }
+
 
 
     var test_alignment_NW = function(game, lastMove, optionCheck){

@@ -1,49 +1,150 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+html, body{
+  width:100%;
+  height:100%;
+  margin:0;
+  background-color: #D4D4E4;
+  font-family: 'acmeregular';
+} 
+
+@font-face {
+  font-family: 'acmeregular';
+  src: url('../font/acme-regular-webfont.woff2') format('woff2'),
+       url('../font/acme-regular-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+#container{
+  width:100%;
+  height:100%;
+  margin:0;
+}
 
 #menuBar{
   width:100%;
   margin:auto;
-  background-color: #C0FFFF;  
+  background-color: #D4D4E4;  
+  text-align: center;
+  border-bottom:1px solid #AFAFC5;
+  padding-bottom:10px;
+}
+
+#menuBar h1{
+  font-size: 3em;  
+  margin:3px;
+}
+.link{
+  text-align: center;
+  font-size: 15px;
+  margin: 20px;
+  color:black;
 }
 
 #gameZone{
-  width:70%;
+  width:80%;
+  height:100%;
   margin:auto;
   /*background-color: #E6E6E6;*/
+  background-color: #D3D3E4;
+  /*padding-top: 2%;*/
+  border-left: 1px solid #AFAFC5;
+  border-right: 1px solid #AFAFC5;
 }
 
 #settingZone{
   display:inline-block;
-  width:30%;
-  background-color: #A6A5C9;
+  width:25%;
+  /*background-color: #D3D3E4;*/
   vertical-align: top;
+  padding-left: 21px;
+  padding-right: 21px;
+  padding-top: 21px;
+}
+
+
+#settingZone .title{
+  text-align: center;
+  font-weight: 600;
+  font-size:1.5em;
+  margin-bottom: 10px;
+  margin-top: 15px
 }
 
 #mask{
   display:inline-block;
-  width:50%;
-  /*background-color: #FFA858;*/
+  width:53.4%;
   text-align: center;
   vertical-align: top;
   position:absolute;
+  padding-top: 21px;
   z-index:2;
   cursor:pointer;
 }
 
 #grid{
   display:inline-block;
-  width:50%;
-  /*background-color: #FFA858;*/
+  width:53.4%;
+  background-color: white
   text-align: center;
   vertical-align: top;
   position:absolute;
+  padding-top: 21px;
   z-index:1;
 }
 
 
 .column{
   display:inline-block;
-  width:14%;
+  width:14.27%;
   /*background-color: #FFC0FF;*/
+}
+
+.column:hover{
+
 }
 
 .square{
@@ -66,6 +167,7 @@
   background-repeat: no-repeat;
   width:100%;
   padding-bottom: 100%;
+  opacity:0.5;
   /*overflow:hidden;*/
   /*margin:1%;*/
   text-align:center;
@@ -73,15 +175,18 @@
 }
 
 .noDisc{
+  background-color: white;
   z-index:1;
-  width:100%;
-  height:100%;
-  border-radius:100%;
-  position:absolute;
+  width:90%;
+  height:90%;
+  top:5%;
+  left:5%;
+  border-radius:90%;
+  position:absolute
 }
 
 .redDisc{
-  background-color: #FF0000;
+  background-color: #A0211C;
   z-index:1;
   width:90%;
   height:90%;
@@ -92,7 +197,7 @@
 }
 
 .blueDisc{
-  background-color: #0000FF;
+  background-color: #3F2D91;
   z-index:1;
   width:90%;
   height:90%;
@@ -101,7 +206,10 @@
   border-radius:90%;
   position:absolute
 }
-
+#winner{
+  float:right;
+  margin-right:10px;
+}
 .cross{
   position:absolute;
   z-index:3;
@@ -122,13 +230,15 @@
   float:left;
   margin-left:4px;
 }
-
+#winner{
+  float:right;
+}
 .smallNoDisc{
   display: inline-block;
   z-index: 1;
   width: 20px;
   height: 20px;
-  border: 1px dotted #A6A5C9;
+  border:1px solid #AFAFC5;
   border-radius: 20px;
   margin-left: 5px;
   position: relative;
@@ -138,7 +248,7 @@
 
 .smallRedDisc{
   display: inline-block;
-  background-color: #FF0000;
+  background-color: #A0211C;
   z-index:1;
   width: 20px;
   height: 20px;
@@ -150,7 +260,7 @@
 
 .smallBlueDisc{
   display: inline-block;
-  background-color: #0000FF;
+  background-color: #3F2D91;
   z-index:1;
   width: 20px;
   height: 20px;
@@ -159,10 +269,74 @@
   top: 5px;
   left: 3px;  
 }
+.info{
+  position:absolute;
+  display:inline-block;
+  top:30%;
+}
+.level-block{
+  position:relative;
+  width:100%;
+  cursor:pointer;
+  border-bottom: 1px solid #AFAFC5;
+}
 
+.level-block:hover{
+  background-color: #BABAD4;
+}
+
+.selected{
+  background-color: #BABAD4;
+  border:3px dotted #848484;
+}
+
+.level-img{
+  position:relative;
+  width:100%;
+}
+.robotFrame{
+  position:relative;
+  width: 32%;
+  height: 32%;
+  display:inline-block;
+  overflow:hidden
+}
+
+#difficulty{
+width: 30%;
+display: inline-block;
+margin-top: 5px;
+}
+.input-level{
+  position:relative;
+  display:inline-block;
+}
 .block{
   display:block;
 }
 .wait{
   margin-left: 5px;
+}
+
+@media only screen and (max-width: 786px) {
+  #gameZone{
+    width:100%;
+    height:auto;
+    border:none;
+  }
+  #mask, #grid {
+    display: block;
+    width:100%;
+  }
+  #settingZone {
+    display: block;
+    width:100%;
+    height:auto;
+    padding:0;
+  }
+
+  .level-block{
+    width:45%;
+    display: inline-block;
+  }
 }

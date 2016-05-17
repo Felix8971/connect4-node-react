@@ -12,7 +12,7 @@ Connect 4 game implemented with React and NodeJS
 4. visit <http://localhost:3000/>
 
 ### Artificial intelligence part
-I use the solution developed by Mr Pascal Pons and "alpha beta pruning" algorithm: http://connect4.gamesolver.org/
+This used the "alpha beta pruning" algorithm developed by Mr Pascal Pons (https://www.linkedin.com/in/pascalpons)
 
 ### Ran into problems, or have any suggestions?
 Email me on felix8971@hotmail.com or [open an issue](https://github.com/felix8971/connect4-node-react
