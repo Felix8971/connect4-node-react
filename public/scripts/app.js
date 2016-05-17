@@ -15,7 +15,8 @@ var GameZone = React.createClass({
     return (
       <div id="gameZone">
           <MenuBar/>
-          <SettingZone game={this.props.game} onUserclickLevel={this.props.onUserclickLevel} />        
+          <SettingZone game={this.props.game} onClickDifficulty={this.props.onClickDifficulty} /> 
+
           <Mask game={this.props.game} onUserClick={this.props.onUserclick} />
           <Grid game={this.props.game} />
       </div>
@@ -26,12 +27,12 @@ var GameZone = React.createClass({
 var SettingZone = React.createClass({
   // handleChange: function(event) {
   //   alert(event.currentTarget.value);
-  //   this.props.onUserclickLevel(event.currentTarget.value);
+  //   this.props.onClickDifficulty(event.currentTarget.value);
   // },  
   //<input className="input-level" type="radio" value={level} checked={this.props.game.level === level } name="level" onChange={this.handleChange}/>
   handleClick: function(event) {
     console.log(event.currentTarget.id);
-    this.props.onUserclickLevel(event.currentTarget.id);
+    this.props.onClickDifficulty(event.currentTarget.id);
 
     //retirer classe selected à tous les level-block
     //attribuer class selected à event.currentTarget
@@ -43,7 +44,7 @@ var SettingZone = React.createClass({
     var style = {};
     var levelRows = [];
     for (var level in connec4Fct.getRankToPLayFromLevelAndNbrChoices) {
-       var img = "../../images/" + connec4Fct.imageFromLevel[level];
+       var img = "images/" + connec4Fct.imageFromLevel[level];
        var className = this.props.game.level === level ? 'level-block selected' :   'level-block';
        levelRows.push( 
         <div key={level} className={className} id={level} onClick={this.handleClick}>
@@ -97,9 +98,8 @@ var Mask = React.createClass({
           turn={this.props.game.turn} 
           level={this.props.game.level} 
           winner={this.props.game.winner}
-          classNames={this.props.game.classNames}  />      
+          classNames={this.props.game.classNames} />      
       </div>
-      
     );    
     
   }
@@ -133,7 +133,7 @@ var NextTurnDisplay = React.createClass({
     return (
       <div>
         <div id="next-turn">Next turn: 
-          <div className={classNames[turn]}></div>{turn === 1 ? <span className="wait">Please wait...</span> : null}
+          {turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
         </div>
         <div id="difficulty">Difficulty: {this.props.level}</div>
         <div id="winner">Winner: 
@@ -250,16 +250,17 @@ var Connect4 = React.createClass({
 
             //if no winner and grid full then draw game 
             if ( this.state.game.nbMove == 42 ){
+              this.state.game.turn = 0;
               alert("draw 0-0 !");
-            }
-            
-            this.state.game.turn = 1;
-            //get actual connect 4 game position in string notation       
-            var pos = connec4Fct.arrayToString(this.state.game.position);
-            //console.log("pos=",pos);
+            }else{
+              this.state.game.turn = 1;
+              //get actual connect 4 game position in string notation       
+              var pos = connec4Fct.arrayToString(this.state.game.position);
+              //console.log("pos=",pos);
 
-            //get the solution from Pascal Pons "alpha beta pruning" algorithm 
-            connec4Fct.computerMove(this);
+              //get the solution from Pascal Pons "alpha beta pruning" algorithm 
+              connec4Fct.computerMove(this);
+            }
           }            
           break;
         case 1:
@@ -285,7 +286,7 @@ var Connect4 = React.createClass({
     } 
   },
 
-  handleUserChangeLevel: function(value) {
+  handleChangeDifficulty: function(value) {
     //alert(value);
     this.state.game.level = value;
     this.forceUpdate();
@@ -295,7 +296,7 @@ var Connect4 = React.createClass({
   render: function() {
     return (
       <div id="container">
-        <GameZone game={this.state.game} onUserclick={this.handleUserClick} onUserclickLevel={this.handleUserChangeLevel}/>
+        <GameZone game={this.state.game} onUserclick={this.handleUserClick} onClickDifficulty={this.handleChangeDifficulty}/>
       </div>
     );
   }
@@ -306,24 +307,3 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-// var array = [2,2,3,15,6,100,100];
-
-// console.log('array:',array);
-// var n = array.length;
-
-// var stat = {};
-
-// for(var i=0;i<n;i++){
-//   if ( array[i] != 100 ){//full column 
-//     if ( !stat[array[i]] ){
-//       stat[array[i]] = {occurrence: 1, positions:[i], value:array[i]};
-//     }else{
-//       stat[array[i]].occurrence++;
-//       stat[array[i]].positions.push(i);
-//     }
-//   }
-// }
-
-// console.log('stat:',stat);
-// var statSorted =_.sortBy(stat, 'value').reverse();
-// console.log('statSorted:',statSorted);
