@@ -21,3 +21,6 @@ Email me on felix8971@hotmail.com or [open an issue](https://github.com/felix897
 
 The sole purpose of this project is to practice (and learn) my skills in ReactJS, please be kind :)
 
+===
+
+![alt tag](http://felixdebon.com/connect4/public/images/connect4Image.png)
