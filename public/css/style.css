@@ -78,21 +78,29 @@ html, body{
   margin:3px;
 }
 .link{
+  display:inline-block;
   text-align: center;
   font-size: 15px;
-  margin: 20px;
+  margin: 10px;
   color:black;
 }
 
-#gameZone{
+
+.content{
   width:80%;
   height:100%;
   margin:auto;
-  /*background-color: #E6E6E6;*/
   background-color: #D3D3E4;
-  /*padding-top: 2%;*/
   border-left: 1px solid #AFAFC5;
   border-right: 1px solid #AFAFC5;
+}
+
+.content p {
+  text-align: justify;
+}
+
+.about{
+  padding:10px;
 }
 
 #settingZone{
@@ -105,8 +113,10 @@ html, body{
   padding-top: 21px;
 }
 
-
-#settingZone .title{
+hr{
+  margin:30px;
+}
+.title{
   text-align: center;
   font-weight: 600;
   font-size:1.5em;
@@ -114,9 +124,17 @@ html, body{
   margin-top: 15px
 }
 
+.sub-title{
+  text-align: center;
+  font-weight: 600;
+  font-size:1.2em;
+  margin-bottom: 10px;
+  margin-top: 15px
+}
+
 #mask{
   display:inline-block;
-  width:53.4%;
+  width:50%;
   text-align: center;
   vertical-align: top;
   position:absolute;
@@ -127,7 +145,7 @@ html, body{
 
 #grid{
   display:inline-block;
-  width:53.4%;
+  width:50%;
   background-color: white
   text-align: center;
   vertical-align: top;
@@ -328,8 +346,11 @@ margin-top: 5px;
 }
 
 @media only screen and (max-width: 786px) {
-  #gameZone{
+  .game{
     width:100%;
+  }
+  .content{
+    /*width:100%;*/
     height:auto;
     border:none;
   }

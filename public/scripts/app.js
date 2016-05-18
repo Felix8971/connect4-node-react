@@ -1,11 +1,12 @@
 var MenuBar = React.createClass({
   render: function() {
     return (
-      <div id="menuBar">
+      <ul id="menuBar">
         <h1>Connect 4</h1>
-        <a href="url" className="link">ABOUT</a>
-        <a href="url" className="link">CREDITS</a>
-      </div>
+        <li className="link"><Link to="/">PLAY</Link></li>
+        <li className="link"><Link to="/about">ABOUT</Link></li>
+        <li className="link"><Link to="/contact">CONTACT</Link></li>
+      </ul>
     );
   }
 });
@@ -13,15 +14,61 @@ var MenuBar = React.createClass({
 var GameZone = React.createClass({
   render: function() {
     return (
-      <div id="gameZone">
-          <MenuBar/>
+      <div className="content game" >
           <SettingZone game={this.props.game} onClickDifficulty={this.props.onClickDifficulty} /> 
-
           <Mask game={this.props.game} onUserClick={this.props.onUserclick} />
           <Grid game={this.props.game} />
       </div>
     );
   }
+});
+
+
+var About = React.createClass({
+  render: function() {
+      return (
+        <div className="content about" >
+          <h1 className="title">ABOUT</h1>
+
+          <h2 className="sub-title">Purpose of this web site</h2>
+          <div> This is a connect 4 responsive web site implemented with React and NodeJS. 
+           I developed it in order to practice (and learn) ReactJS. 
+          
+          <h2 className="sub-title">Rules</h2>
+          Connect four (also called Gravitrips in Soviet Union) is a two players strategy game. 
+          Each player drops alternatively a chip of his colors. The first player to align four chips wins.
+          
+          <h2 className="sub-title">Extra features on this website</h2>
+          You can play against an artificial intelligence with 5 differents difficulty levels.
+          If you think that a level is too easy you can try the next level but note that in "hard" level it is impossible to win if you let the AI play first... 
+          
+          <h2 className="sub-title">AI algorithm.</h2>
+          The AI part of this game used a cool version of the <a href="https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning" target="_blank">alpha beta pruning</a> algorithm developed 
+          by <a href="https://www.linkedin.com/in/pascalpons" target="_blank"> Mr Pascal Pons</a> 
+          
+          <hr/>
+          Have any suggestions or comments ? Email me on  <a href="mailto:felix8971@hotmail.com?Subject=Hello%20again" target="_top"> felix8971@hotmail.com</a>.
+          
+          </div>
+        </div>
+      );
+    }
+});
+
+var Contact = React.createClass({
+  render: function() {
+      return (
+        <div className="content about" >
+          <h2 className="sub-title">CONTACT</h2>
+          <p>
+            My name is Félix DEBON, I am a Javascript web developer based in Paris.<br/> 
+            You can see my works on my <a href="http://felixdebon.com/portfolio/" target="_blank" >portfolio</a>.<br/>
+            <br/> 
+            Have any suggestions or comments ? Email me on  <a href="mailto:felix8971@hotmail.com?Subject=Hello%20again" target="_top"> felix8971@hotmail.com</a><br/> 
+          </p>
+        </div>
+      );
+    }
 });
 
 var SettingZone = React.createClass({
@@ -188,7 +235,7 @@ var ColumnGrid = React.createClass({
       return (
         <div className="square" key={idDisc} id={idSquare} >
           <div  id={idDisc} className={classNames[square]}></div>
-          { aligned[col][line] ? <img className="cross" src="../../images/forbidden-mark.svg"/> : null }
+          { aligned[col][line] ? <img className="cross" src="images/forbidden-mark.svg"/> : null }
         </div>
       );
     });
@@ -302,8 +349,44 @@ var Connect4 = React.createClass({
   }
 });
 
+// ReactDOM.render(
+//   <Connect4 />,
+//   document.getElementById('container')
+// );
+
+//routing: see this excellent tutorial https://www.kirupa.com/react/creating_single_page_app_react_using_react_router.htm 
+
+//What gets displayed inside App is controlled by the result of this.props.children instead of a hard-coded component.
+var App = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <MenuBar/>
+        <div>
+          {this.props.children}
+        </div>
+      </div>
+    )
+  }
+});
+
+//allow us to remove the ReactRouter prefix from our Router and Route component instances below
+var { Router,
+      Route,
+      IndexRoute,
+      IndexLink,
+      Link } = ReactRouter;
+
+//Our Route element inside ReactDOM.render contains an IndexRoute element whose sole purpose for existing is to declare 
+//which component will be displayed when the app initially loads.
 ReactDOM.render(
-  <Connect4 />,
+  //router component & routing configuration (i.e mapping between URLs and the views)
+  <Router>
+    <Route path="/" component={App}>
+      <IndexRoute component={Connect4} />
+      <Route path="about" component={About} />
+      <Route path="contact" component={Contact} />            
+    </Route>
+  </Router>,
   document.getElementById('container')
 );
-
