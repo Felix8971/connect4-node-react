@@ -29,11 +29,11 @@ var About = React.createClass({
       return (
         <div className="content about" >
           <h1 className="title">ABOUT</h1>
-
-          <h2 className="sub-title">Purpose of this web site</h2>
-          <div> This is a connect 4 responsive web site implemented with React and NodeJS. 
-           I developed it in order to practice (and learn) ReactJS. 
+          <div className="pg">
           
+          <h2 className="sub-title">Purpose of this web site</h2>
+          This is a connect 4 responsive web site implemented with React and NodeJS. 
+           I developed it in order to practice (and learn) ReactJS. 
           <h2 className="sub-title">Rules</h2>
           Connect four (also called Gravitrips in Soviet Union) is a two players strategy game. 
           Each player drops alternatively a chip of his colors. The first player to align four chips wins.
@@ -60,8 +60,8 @@ var Contact = React.createClass({
       return (
         <div className="content about" >
           <h2 className="sub-title">CONTACT</h2>
-          <p>
-            My name is Félix DEBON, I am a Javascript web developer based in Paris.<br/> 
+          <p className="pg">
+            My name is Félix DEBON, I am a Javascript web developer based in Paris.  
             You can see my works on my <a href="http://felixdebon.com/portfolio/" target="_blank" >portfolio</a>.<br/>
             <br/> 
             Have any suggestions or comments ? Email me on  <a href="mailto:felix8971@hotmail.com?Subject=Hello%20again" target="_top"> felix8971@hotmail.com</a><br/> 
@@ -102,6 +102,7 @@ var SettingZone = React.createClass({
         </div>
       );   
     }
+    var turn = this.props.game.turn;
     //style.display = 'none';
     return (
       <div id="settingZone">
@@ -123,7 +124,12 @@ var Mask = React.createClass({
     //console.log(event.currentTarget.id);
     var col = parseInt(event.currentTarget.id.split('-')[2]);
     this.props.onUserClick(col);
-  },  
+  }, 
+
+  playAgain: function(event) {
+    this.props.onUserClick();
+  }, 
+
   render: function() {
     var that = this;
     var col=-1;
@@ -137,9 +143,11 @@ var Mask = React.createClass({
         </div>
       );
     });
-
+    var turn = this.props.game.turn;
     return (
       <div id="mask">
+        
+        {turn === 0 ?  <div id="playAgain" onClick={that.playAgain}>Click to play again</div>  : null }
         {columns}
         <NextTurnDisplay 
           turn={this.props.game.turn} 
@@ -314,8 +322,8 @@ var Connect4 = React.createClass({
           alert("It's not your turn...");
           break;
         case 0:
-          var rep = confirm("Play again ?");
-          if (rep){
+          //var rep = confirm("Play again ?");
+          //if (rep){
             var self = this;
             //Rem: setState works asynchronously so we need to use a callback:
             this.setState({ game : new connec4Fct.game(this.state.game.level) }, function(){
@@ -326,7 +334,7 @@ var Connect4 = React.createClass({
                 //no code here because this.handleUserClick() will be called on the click event
               }
             });
-          }
+          //}
           break;
         default:
           alert("an error");

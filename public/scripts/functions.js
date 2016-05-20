@@ -57,7 +57,7 @@ var connec4Fct = {
   },
 
   /**
-   * For each of the scores array we determine where it appears (positions) and how often
+   * For each value of the scores array we determine where it appears (positions) and how often
    * and then a decreasing sort is made on the score value
   **/
   getArrayStat: function(array){
@@ -119,7 +119,7 @@ var connec4Fct = {
       dataType: 'json',
       cache: false,
       success: function(data) {
-        console.log("data:",data);
+        //console.log("data:",data);
         
         // data.score = score for each playable column: winning moves have a positive score and losing moves 
         // have a negative score. The absolute value of the score gives you the number of moves 
@@ -130,7 +130,7 @@ var connec4Fct = {
         var stat = connec4Fct.getArrayStat(array);
         var n = stat.length;
         //alert(n);
-        console.log('stat:',stat);
+        //console.log('stat:',stat);
         var columnPlayed;
 
         //console.log("easy and nb choice " + n + ": "+connec4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
