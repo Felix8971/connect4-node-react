@@ -366,6 +366,12 @@ margin-top: 5px;
   left: 3px;   
 }
 
+@media only screen and (max-width: 460px) {
+  .github-fork-ribbon{
+    display:none;
+  }
+}
+
 @media only screen and (max-width: 786px) {
   .game{
     width:100%;
@@ -395,9 +401,9 @@ margin-top: 5px;
     width:150px;
   }
 
-.pg{
-  width: 95%;
-} 
+  .pg{
+    width: 95%;
+  } 
 
 }
 
