@@ -4408,19 +4408,6 @@ var About = require('./about.js');
 var Contact = require('./contact.js');
 var Connect4Fct = require('./connect4Fct.js');
 
-// var MenuBar = React.createClass({
-//   render: function() {
-//     return (
-//       <ul id="menuBar">
-//         <h1>Connect 4</h1>
-//         <li className="link"><Link to="/">PLAY</Link></li>
-//         <li className="link"><Link to="/about">ABOUT</Link></li>
-//         <li className="link"><Link to="/contact">CONTACT</Link></li>
-//       </ul>
-//     );
-//   }
-// });
-
 var MenuBar = React.createClass({
   displayName: 'MenuBar',
 
