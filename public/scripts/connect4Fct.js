@@ -1,5 +1,5 @@
 //Add new disc on connect4's grid
-var connec4Fct = {
+var Connect4Fct = {
   
   arrayToString: function(array){
     var n = array.length;
@@ -23,6 +23,8 @@ var connec4Fct = {
   },
 
   game: function(level){
+        this.opponentType = "robot"; //can be "robot" ou "human" 
+        this.opponent= "Felix8971";
         this.level = level || "normal";
         this.nbMove = 0;
         this.winner = 0;
@@ -31,8 +33,12 @@ var connec4Fct = {
         this.classNames = ["noDisc","redDisc","blueDisc"];
         this.url = "http://connect4.gamesolver.org/solve?";
         this.players = [
-          { name:"IA", id:1 , className:"redDisc"},
-          { name:"Guest", id:2, className:"blueDisc" }
+          // { name:"Toto125", id:1, img:"human.png" } ,
+          // { name:"Felix8971", id:2 , img:"human.png" },
+          // { name:"GrosMinet", id:3 , img:"human.png"  },
+          // { name:"aaaaaa", id:4, img:"human.png" } ,
+          // { name:"bbbbbbbbb", id:5 , img:"human.png" },
+          // { name:"cccc", id:6 , img:"human.png"  },          
         ];
 
         this.position = [];//list of column's numbers successively played, first column is 1
@@ -85,7 +91,7 @@ var connec4Fct = {
   },
 
   /**
-   *  Dans le tableau retourné parconnec4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
+   *  Dans le tableau retourné parConnect4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
    *  en fonction du niveau de jeu et du nombre de choix possibles
   **/  
   getRankToPLayFromLevelAndNbrChoices : {
@@ -111,7 +117,7 @@ var connec4Fct = {
   **/
   computerMove: function(_this){
     var game = _this.state.game;
-    var pos = connec4Fct.arrayToString(game.position);
+    var pos = Connect4Fct.arrayToString(game.position);
 
     $.ajax({
       url: game.url,
@@ -127,27 +133,27 @@ var connec4Fct = {
         // score of 100 on a column means that the column is full. 
         var array = data.score;
       
-        var stat = connec4Fct.getArrayStat(array);
+        var stat = Connect4Fct.getArrayStat(array);
         var n = stat.length;
         //alert(n);
         //console.log('stat:',stat);
         var columnPlayed;
 
-        //console.log("easy and nb choice " + n + ": "+connec4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+        //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
         //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-        var rank = connec4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+        var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
 
-        //columnPlayed = connec4Fct.getRandomElementInArray(stat[n-1].positions);
-        columnPlayed = connec4Fct.getRandomElementInArray(stat[rank].positions);
+        //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
+        columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
        
-        var lastMove = connec4Fct.addDisc(game, columnPlayed);
+        var lastMove = Connect4Fct.addDisc(game, columnPlayed);
         game.nbMove++;
         
         //we update the game state
         _this.forceUpdate();    
         //_this.setState({ game : game });
 
-        var win = connec4Fct.testWin(game, lastMove);
+        var win = Connect4Fct.testWin(game, lastMove);
 
 
         if ( win ){//computer win
@@ -212,7 +218,7 @@ var connec4Fct = {
     var test_alignment_EW = function(game, lastMove, optionCheck){
       var nbAlignedDisc = 1;
       //horizontal right direction
-      //connec4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
+      //Connect4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
       for(var k=1;k<=3;k++){
         if ( lastMove.col+k < 7 ){
           if ( game.grid[lastMove.col+k][lastMove.line+0] === lastMove.turn){
@@ -226,7 +232,7 @@ var connec4Fct = {
         }
       }
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
-      //connec4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
+      //Connect4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
       
       //horizontal left direction
       for(var k=1;k<=3;k++){
@@ -375,6 +381,7 @@ var connec4Fct = {
     }
   },
 
-
-
 };
+
+
+module.exports = Connect4Fct;

@@ -9,7 +9,8 @@ You can play against an artificial intelligence with 5 differents difficulty lev
 
 1. `cd` into your project directory
 2. run `npm install`
-3. run `node server.js` or 'nodejs server.js' (ubuntu)
+3. run `npm run build` 
+4. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
 4. visit <http://localhost:3000/>
 
 ### Artificial intelligence part

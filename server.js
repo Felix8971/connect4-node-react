@@ -3,6 +3,14 @@ var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var server = require('http').Server(app);
+
+// initializing express-session middleware
+var Session = require('express-session');
+var SessionStore = require('session-file-store')(Session);
+var session = Session({store: new SessionStore({path: __dirname+'/sessions'}), secret: 'pass', resave: true, saveUninitialized: true});
+
+
 
 var COMMENTS_FILE = path.join(__dirname, 'comments.json');
 
@@ -11,6 +19,12 @@ app.set('port', (process.env.PORT || 3000));
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(session);
+
+// voir https://github.com/xpepermint/socket.io-express-session/tree/master/example
+var ios = require('socket.io-express-session');
+var io = require('socket.io')(server);
+io.use(ios(session)); // session support
 
 // Additional middleware which will set headers that we need on each request.
 app.use(function(req, res, next) {
