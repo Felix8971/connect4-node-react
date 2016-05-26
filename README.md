@@ -7,7 +7,7 @@ You can play against an artificial intelligence with 5 differents difficulty lev
 
 ### To get started
 
-1. `cd` into your project directory
+1. `cd` into your project directory.
 2. run `npm install`
 3. run `npm run build` 
 4. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
