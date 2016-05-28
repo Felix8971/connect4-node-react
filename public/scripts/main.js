@@ -18,12 +18,7 @@ var MenuBar = React.createClass({
       return { focused: index  };
     },
 
-    clicked: function(index){
-      // The click handler will update the state with the index of the focused menu entry
-      this.setState({focused: index});
-    },
-
-    clicked2: function(event){
+    clicked: function(event){
       // The click handler will update the state with the index of the focused menu entry
       // currentTarget always refers to the element the event handler has been attached to as opposed to event.target which identifies the element on which the event occurred.
       this.setState({focused: event.currentTarget.id});
@@ -39,7 +34,7 @@ var MenuBar = React.createClass({
               { this.props.items.map(function(m){
                   var style = self.state.focused == m.index ? 'focused' : '';
                   return (
-                    <Link id={m.index} to={m.url} key={m.index} className={style} onClick={self.clicked2}>
+                    <Link id={m.index} to={m.url} key={m.index} className={style} onClick={self.clicked}>
                       {m.name}
                     </Link>
                   );
