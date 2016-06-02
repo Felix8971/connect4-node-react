@@ -4092,65 +4092,127 @@ var Connect4Fct = {
     * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
     * and make the computer play 
   **/
+
+  // computerMove: function(_this){
+  //   var game = _this.state.game;
+  //   var pos = Connect4Fct.arrayToString(game.position);
+
+  //   $.ajax({
+  //     url: game.url,
+  //     data:{pos:pos},
+  //     dataType: 'json',
+  //     cache: false,
+  //     success: function(data) {
+  //       console.log("data with jquery:",data);
+
+  //       // data.score = score for each playable column: winning moves have a positive score and losing moves
+  //       // have a negative score. The absolute value of the score gives you the number of moves
+  //       // before the end of the game. Hence best moves have highest scores.
+  //       // score of 100 on a column means that the column is full.
+  //       var array = data.score;
+
+  //       var stat = Connect4Fct.getArrayStat(array);
+  //       var n = stat.length;
+  //       //alert(n);
+  //       //console.log('stat:',stat);
+  //       var columnPlayed;
+
+  //       //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+  //       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
+  //       var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+
+  //       //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
+  //       columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
+
+  //       var lastMove = Connect4Fct.addDisc(game, columnPlayed);
+  //       game.nbMove++;
+
+  //       //we update the game state
+  //       _this.forceUpdate();   
+  //       //_this.setState({ game : game });
+
+  //       var win = Connect4Fct.testWin(game, lastMove);
+
+  //       if ( win ){//computer win
+  //         game.winner = 1;
+  //         game.turn = 0;    
+  //         alert("You loose!");
+  //       }else{//pass turn to user
+  //         if ( this.state.game.nbMove == 42 ){
+  //           alert("draw 0-0 !");
+  //         }
+  //         game.turn = 2;
+  //         //this.state.game.turn = 2;            
+  //       }
+  //       //_this.setState({ game : game });
+  //       _this.forceUpdate();   
+  //     }.bind(_this),
+  //     error: function(xhr, status, err) {
+  //       console.error(_this.props.url, status, err.toString());
+  //     }.bind(_this)
+  //   });
+
+  // },
+
   computerMove: function (_this) {
     var game = _this.state.game;
     var pos = Connect4Fct.arrayToString(game.position);
+    //var pos ="32";
+    //console.log('pos=',pos);
 
-    $.ajax({
-      url: game.url,
-      data: { pos: pos },
-      dataType: 'json',
-      cache: false,
-      success: function (data) {
-        //console.log("data:",data);
+    var options = {
+      method: 'GET'
+    };
 
-        // data.score = score for each playable column: winning moves have a positive score and losing moves
-        // have a negative score. The absolute value of the score gives you the number of moves
-        // before the end of the game. Hence best moves have highest scores.
-        // score of 100 on a column means that the column is full.
-        var array = data.score;
+    fetch(game.url + "pos=" + pos, options).then(function (res) {
+      return res.json();
+    }).then(function (data) {
+      //console.log('data=',data);
+      // data.score = score for each playable column: winning moves have a positive score and losing moves
+      // have a negative score. The absolute value of the score gives you the number of moves
+      // before the end of the game. Hence best moves have highest scores.
+      // score of 100 on a column means that the column is full.
+      var array = data.score;
 
-        var stat = Connect4Fct.getArrayStat(array);
-        var n = stat.length;
-        //alert(n);
-        //console.log('stat:',stat);
-        var columnPlayed;
+      var stat = Connect4Fct.getArrayStat(array);
+      var n = stat.length;
+      //alert(n);
+      //console.log('stat:',stat);
+      var columnPlayed;
 
-        //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
-        //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-        var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n - 1];
+      //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+      //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
+      var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n - 1];
 
-        //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
-        columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
+      //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
+      columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
 
-        var lastMove = Connect4Fct.addDisc(game, columnPlayed);
-        game.nbMove++;
+      var lastMove = Connect4Fct.addDisc(game, columnPlayed);
+      game.nbMove++;
 
-        //we update the game state
-        _this.forceUpdate();
-        //_this.setState({ game : game });
+      //we update the game state
+      _this.forceUpdate();
+      //_this.setState({ game : game });
 
-        var win = Connect4Fct.testWin(game, lastMove);
+      var win = Connect4Fct.testWin(game, lastMove);
 
-        if (win) {
-          //computer win
-          game.winner = 1;
-          game.turn = 0;
-          alert("You loose!");
-        } else {
-          //pass turn to user
-          if (this.state.game.nbMove == 42) {
-            alert("draw 0-0 !");
-          }
-          game.turn = 2;
-          //this.state.game.turn = 2;           
+      if (win) {
+        //computer win
+        game.winner = 1;
+        game.turn = 0;
+        alert("You loose!");
+      } else {
+        //pass turn to user
+        if (this.state.game.nbMove == 42) {
+          alert("draw 0-0 !");
         }
-        //_this.setState({ game : game });
-        _this.forceUpdate();
-      }.bind(_this),
-      error: function (xhr, status, err) {
-        console.error(_this.props.url, status, err.toString());
-      }.bind(_this)
+        game.turn = 2;
+        //this.state.game.turn = 2;           
+      }
+      //_this.setState({ game : game });
+      _this.forceUpdate();
+    }.bind(_this)).catch(function (error) {
+      console.log('There has been a problem with your fetch operation: ' + error.message);
     });
   },
 
@@ -4378,19 +4440,19 @@ module.exports = React.createClass({
       React.createElement(
         "p",
         { className: "pg" },
-        "My name is Félix DEBON, I am a Javascript web developer based in Paris.",
+        "My name is Félix DEBON, I'm a Javascript web developer based in Paris.",
         React.createElement("br", null),
         React.createElement("br", null),
-        "You can see my works on my ",
+        "You can see my works ",
         React.createElement(
           "a",
           { href: "http://felixdebon.com/portfolio/", target: "_blank" },
-          "portfolio"
+          "here"
         ),
         ".",
         React.createElement("br", null),
         React.createElement("br", null),
-        "Have any suggestions or comments ? Email me on  ",
+        "Have any suggestions or comments about this game ? Email me on  ",
         React.createElement(
           "a",
           { href: "mailto:felix8971@hotmail.com?Subject=Hello%20again", target: "_top" },
@@ -4406,6 +4468,7 @@ module.exports = React.createClass({
 
 //var React = require('react');
 //var Connect4Fct = require("./connect4Fct.js");
+//var React = require('react');
 
 var About = require('./about.js');
 var Contact = require('./contact.js');
@@ -4634,7 +4697,6 @@ var ChooseMode = React.createClass({
       )
     );
   }
-
 });
 
 var Mask = React.createClass({
@@ -4798,8 +4860,25 @@ var ColumnGrid = React.createClass({
   }
 });
 
+var Loader = React.createClass({
+  displayName: 'Loader',
+
+  render: function () {
+    return React.createElement(
+      'div',
+      { id: 'loading' },
+      React.createElement('img', { id: 'loading-image', src: 'images/loading_apple.gif', alt: 'Loading...' })
+    );
+  }
+});
+
 var Connect4 = React.createClass({
   displayName: 'Connect4',
+
+
+  componentDidUpdate: function () {
+    //$('#loading').hide(); 
+  },
 
   //componentDidMount is a method called automatically by React after a component is rendered for the first time.
   componentDidMount: function () {
@@ -4809,7 +4888,6 @@ var Connect4 = React.createClass({
     // });
     var self = this;
     setTimeout(function () {
-
       if (self.state.game.turn === 1) {
         //faire jouer la machine   
         //get actual connect 4 game position in string notation      
@@ -4822,7 +4900,8 @@ var Connect4 = React.createClass({
   getInitialState: function () {
     //var firstPlayer = 1 + Math.floor(2*Math.random());// 1 or 2 random  
     return {
-      game: new Connect4Fct.game()
+      game: new Connect4Fct.game(),
+      loading: true
     };
   },
 
@@ -4904,7 +4983,7 @@ var Connect4 = React.createClass({
   },
 
   render: function () {
-
+    //{ this.state.loading ? <Loader/> : null }
     return React.createElement(
       'div',
       { id: 'container' },
@@ -4935,6 +5014,10 @@ var Connect4 = React.createClass({
 var App = React.createClass({
   displayName: 'App',
 
+  // componentDidMount: function() {
+
+  // }, 
+
   render: function () {
     var items = [{ index: 0, name: 'PLAY', url: '/' }, { index: 1, name: 'ABOUT', url: '/about' }, { index: 2, name: 'CONTACT', url: '/contact' }];
 
@@ -4955,6 +5038,8 @@ var App = React.createClass({
     );
   }
 });
+
+//ReactDOM.render(<Loader/>, document.body);
 
 //allow us to remove the ReactRouter prefix from our Router and Route component instances below
 var { Router,

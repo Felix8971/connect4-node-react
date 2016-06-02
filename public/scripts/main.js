@@ -1,6 +1,7 @@
 
 //var React = require('react');
 //var Connect4Fct = require("./connect4Fct.js");
+//var React = require('react');
 
 var About = require('./about.js');
 var Contact = require('./contact.js');
@@ -174,7 +175,6 @@ var ChooseMode = React.createClass({
       </div>
     );
   }
-  
 });
  
 
@@ -313,8 +313,22 @@ var ColumnGrid = React.createClass({
   }
 });
 
+var Loader = React.createClass({
+   render: function() {
+     return (
+      <div id="loading">
+        <img id="loading-image" src='images/loading_apple.gif' alt='Loading...'/>
+      </div>
+     )
+   }
+});
 
 var Connect4 = React.createClass({
+  
+  componentDidUpdate : function() {
+    //$('#loading').hide();  
+  },
+
   //componentDidMount is a method called automatically by React after a component is rendered for the first time. 
   componentDidMount: function() {
     // $(".square").each( function(index){
@@ -323,7 +337,6 @@ var Connect4 = React.createClass({
     // });
     var self = this;
     setTimeout(function(){
-      
       if ( self.state.game.turn === 1 ){//faire jouer la machine    
         //get actual connect 4 game position in string notation       
         var pos = Connect4Fct.arrayToString(self.state.game.position);
@@ -335,7 +348,8 @@ var Connect4 = React.createClass({
   getInitialState: function() {
     //var firstPlayer = 1 + Math.floor(2*Math.random());// 1 or 2 random   
     return {
-      game: new Connect4Fct.game()
+      game: new Connect4Fct.game(),
+      loading : true
     };
   },
 
@@ -415,11 +429,12 @@ var Connect4 = React.createClass({
 
 
   render: function() {
-
+    //{ this.state.loading ? <Loader/> : null }
     return (
       <div id="container">
+        
         <div className="content game" >
-           
+            
             <SettingZone 
               game={this.state.game} 
               onClickDifficulty={this.handleChangeDifficulty}
@@ -444,6 +459,10 @@ var Connect4 = React.createClass({
 
 //What gets displayed inside App is controlled by the result of this.props.children instead of a hard-coded component.
 var App = React.createClass({
+  // componentDidMount: function() {
+
+  // },  
+
   render: function() {
     var items = [
       {index:0, name:'PLAY',url:'/'},
@@ -453,7 +472,6 @@ var App = React.createClass({
 
     return (
       <div>
-       
         <h1 className="mainTitle">Connect 4</h1>
         <MenuBar items={items} />
         <div>
@@ -463,6 +481,10 @@ var App = React.createClass({
     )
   }
 });
+
+
+
+//ReactDOM.render(<Loader/>, document.body);
 
 //allow us to remove the ReactRouter prefix from our Router and Route component instances below
 var { Router,

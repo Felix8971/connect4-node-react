@@ -115,67 +115,132 @@ var Connect4Fct = {
     * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
     * and make the computer play 
   **/
+
+  // computerMove: function(_this){
+  //   var game = _this.state.game;
+  //   var pos = Connect4Fct.arrayToString(game.position);
+    
+  //   $.ajax({
+  //     url: game.url,
+  //     data:{pos:pos},
+  //     dataType: 'json',
+  //     cache: false,
+  //     success: function(data) {
+  //       console.log("data with jquery:",data);
+        
+  //       // data.score = score for each playable column: winning moves have a positive score and losing moves 
+  //       // have a negative score. The absolute value of the score gives you the number of moves 
+  //       // before the end of the game. Hence best moves have highest scores. 
+  //       // score of 100 on a column means that the column is full. 
+  //       var array = data.score;
+      
+  //       var stat = Connect4Fct.getArrayStat(array);
+  //       var n = stat.length;
+  //       //alert(n);
+  //       //console.log('stat:',stat);
+  //       var columnPlayed;
+
+  //       //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+  //       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
+  //       var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+
+  //       //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
+  //       columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
+       
+  //       var lastMove = Connect4Fct.addDisc(game, columnPlayed);
+  //       game.nbMove++;
+        
+  //       //we update the game state
+  //       _this.forceUpdate();    
+  //       //_this.setState({ game : game });
+
+  //       var win = Connect4Fct.testWin(game, lastMove);
+
+
+  //       if ( win ){//computer win
+  //         game.winner = 1;
+  //         game.turn = 0;     
+  //         alert("You loose!");
+  //       }else{//pass turn to user
+  //         if ( this.state.game.nbMove == 42 ){
+  //           alert("draw 0-0 !");
+  //         }
+  //         game.turn = 2;
+  //         //this.state.game.turn = 2;             
+  //       }
+  //       //_this.setState({ game : game }); 
+  //       _this.forceUpdate();    
+  //     }.bind(_this),
+  //     error: function(xhr, status, err) {
+  //       console.error(_this.props.url, status, err.toString());
+  //     }.bind(_this)
+  //   });
+
+  // },
+
+
   computerMove: function(_this){
     var game = _this.state.game;
     var pos = Connect4Fct.arrayToString(game.position);
+    //var pos ="32";
+    //console.log('pos=',pos);
+   
+    var options = {  
+      method: 'GET'
+    };
 
-    $.ajax({
-      url: game.url,
-      data:{pos:pos},
-      dataType: 'json',
-      cache: false,
-      success: function(data) {
-        //console.log("data:",data);
-        
-        // data.score = score for each playable column: winning moves have a positive score and losing moves 
-        // have a negative score. The absolute value of the score gives you the number of moves 
-        // before the end of the game. Hence best moves have highest scores. 
-        // score of 100 on a column means that the column is full. 
-        var array = data.score;
+    fetch(game.url+"pos="+pos, options).then(function(res) {
+      return res.json();
+    }).then(function(data){
+      //console.log('data=',data);
+      // data.score = score for each playable column: winning moves have a positive score and losing moves 
+      // have a negative score. The absolute value of the score gives you the number of moves 
+      // before the end of the game. Hence best moves have highest scores. 
+      // score of 100 on a column means that the column is full. 
+      var array = data.score;
+    
+      var stat = Connect4Fct.getArrayStat(array);
+      var n = stat.length;
+      //alert(n);
+      //console.log('stat:',stat);
+      var columnPlayed;
+
+      //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+      //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
+      var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+
+      //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
+      columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
+     
+      var lastMove = Connect4Fct.addDisc(game, columnPlayed);
+      game.nbMove++;
       
-        var stat = Connect4Fct.getArrayStat(array);
-        var n = stat.length;
-        //alert(n);
-        //console.log('stat:',stat);
-        var columnPlayed;
+      //we update the game state
+      _this.forceUpdate();    
+      //_this.setState({ game : game });
 
-        //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
-        //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-        var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+      var win = Connect4Fct.testWin(game, lastMove);
 
-        //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
-        columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
-       
-        var lastMove = Connect4Fct.addDisc(game, columnPlayed);
-        game.nbMove++;
-        
-        //we update the game state
-        _this.forceUpdate();    
-        //_this.setState({ game : game });
-
-        var win = Connect4Fct.testWin(game, lastMove);
-
-
-        if ( win ){//computer win
-          game.winner = 1;
-          game.turn = 0;     
-          alert("You loose!");
-        }else{//pass turn to user
-          if ( this.state.game.nbMove == 42 ){
-            alert("draw 0-0 !");
-          }
-          game.turn = 2;
-          //this.state.game.turn = 2;             
+      if ( win ){//computer win
+        game.winner = 1;
+        game.turn = 0;     
+        alert("You loose!");
+      }else{//pass turn to user
+        if ( this.state.game.nbMove == 42 ){
+          alert("draw 0-0 !");
         }
-        //_this.setState({ game : game }); 
-        _this.forceUpdate();    
-      }.bind(_this),
-      error: function(xhr, status, err) {
-        console.error(_this.props.url, status, err.toString());
-      }.bind(_this)
+        game.turn = 2;
+        //this.state.game.turn = 2;             
+      }
+      //_this.setState({ game : game }); 
+      _this.forceUpdate();          
+    }.bind(_this) )
+    .catch(function(error) {
+      console.log('There has been a problem with your fetch operation: ' + error.message);
     });
 
   },
+
 
   /**
    * Try to add a disc on the game's grid  
