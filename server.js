@@ -114,7 +114,7 @@ io.on('connection', function (socket) {
   clients[socket.id] = socket;
 
   console.log('New client connected!');
-  socket.emit("connection");
+  //socket.emit("connection");
   //we send the users list to the client when he arrives
   //io.sockets.emit('majPlayers', players);
 

@@ -43,7 +43,6 @@ var C4Fct = {
 
   game: function(level){
         this.pseudo = null,
-        this.connected = false,
         this.opponentType = "robot"; //can be "robot" ou "human" 
         this.opponent= null;
         this.level = level || "normal";

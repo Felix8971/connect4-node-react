@@ -1,18 +1,19 @@
 
 //var React = require('react');
-//var C4Fct = require("./C4Fct.js");
-//var React = require('react');
 
+var socket = io();
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
-var socket = io();
+var debug = false;
+
+
 
 var MenuBar = React.createClass({
 
     getInitialState: function(){
       var index=0;
-      //if the user refresh the page we stay on the last page and we keep menu selection
+      //if the user refresh the page we stay on the previous page and we keep menu selection's setting
       this.props.items.map(function(m){
         window.location.hash.indexOf(m.url) >= 0 ? index = m.index : null;
       });
@@ -294,9 +295,6 @@ var SettingZone = React.createClass({
 
         case 'human':
 
-           //var opponent = this.props.game.opponent;
-          //console.log('this.props.game.opponent:',this.props.game.opponent);
-          //console.log('this.props.game.pseudo->',this.props.game.pseudo);
           var players = this.props.game.players;
           var playerRows = [];
           //C4Fct.displayPlayers(players);
@@ -361,17 +359,13 @@ var Connect4 = React.createClass({
       },2000);
     }
 
-    socket.on('remove-player', function (players) {
 
-    });
-
-    socket.on('maj-players', function (players) {
-      console.log('maj-players');
+    socket.on('majPlayers', function (players) {
+      console.log('majPlayers');
       self.state.game.players = players;
 
       //si l'opponent courant de pseudo est parti on reinitialise le jeu
       if ( self.state.game.opponent ){
-        //alert("1");
         if ( !C4Fct.isPseudoUsed(self.state.game.opponent,players) && self.state.game.opponentType === "human" ){
           alert("Your opponent is gone (You win!)");
           self.state.game = new C4Fct.game();
@@ -380,25 +374,15 @@ var Connect4 = React.createClass({
 
       self.forceUpdate();
     });
-
-    //the server tell to the client who is his opponent 
-    socket.on('opponent', function (opponent, players){
-      alert('maj-opponent');
-      self.state.game.players = players;
-      self.state.game.opponent = opponent;
-      self.forceUpdate();
-    });
-
-    
+   
     socket.on('start-game', function (sid, players){
       alert('start-game with '+players[sid].pseudo);
       console.log(players);
     });
 
-    socket.on('connection', function (sid, players){
-      self.state.game.connected = true;
-    });
-
+    //socket.on('connection', function (sid, players){
+      //self.state.game.connected = true;
+    //});
 
   },  
 
@@ -476,10 +460,8 @@ var Connect4 = React.createClass({
   },
 
   handleChangeDifficulty: function(value){
-    //alert(value);
     this.state.game.level = value;
     this.forceUpdate();
-    //this.setState({ game : game });
   },
 
   updatePseudo: function(pseudo){
@@ -496,10 +478,6 @@ var Connect4 = React.createClass({
   handleChangeOpponentType: function(value){
     console.log("handleChangeOpponentType:",value);
 
-    // socket.emit('changeOpponentType');
-    // //players[players[socket.id].opponent_sid].dispo = true;
-    // //players[players[socket.id].opponent_sid].opponent_sid = null;
-
     var that = this;
 
     if ( value != that.state.game.opponentType ){//if user change opponentType by clicking on the opposite radiobutton
@@ -511,7 +489,6 @@ var Connect4 = React.createClass({
 
       if ( value === "human"){
 
-         //socket.socket.reconnect();
         if ( that.state.game.connected ){
           alert("cas forceNew");
           io.connect(SERVER_IP,{'forceNew':true });
@@ -520,7 +497,6 @@ var Connect4 = React.createClass({
         //If user doesn't have a pseudo we ask him to choose one (a default pseudo is given anyway)
         while ( !that.state.game.pseudo ){
           var pseudo = prompt("Choose a pseudo please","guest_"+C4Fct.getRandomIntInclusive(1,999999));
-          //console.log('y:',this.props.game.players);
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
           if ( pseudo.trim().length > 0 ){
             that.state.game.pseudo = pseudo; 
@@ -538,22 +514,6 @@ var Connect4 = React.createClass({
                 //ne fonctinnera pas si le user est deconnécté de la socket
                 socket.emit('addPlayer', pseudo);//we ask the server to add a new user to the users list
 
-                // C4Fct.getOpponent(pseudo, function(data){
-                //     console.log("data recue=",data);
-                //     if ( data.pseudo ){//if we find an opponent
-                //       //maj this.state.game.opponent in the parent component
-                //       console.log("Hey!");
-                //       that.updateOpponent(data.pseudo);
-                //       C4Fct.getPlayers(function(players){
-                //         that.state.game.players = players;
-                //         that.forceUpdate();
-                //       });
-                //     }            
-                // });
-
-                // console.log("turn=",this.state.game.turn);    
-                // console.log("opponentType=",value);
-
               }else{
                 alert("This pseudo is already used, choose a new one !");
               }            
@@ -563,10 +523,9 @@ var Connect4 = React.createClass({
         }
       }
       
-
       if ( value === "robot"){
 
-        that.state.game.connected = false;
+        //that.state.game.connected = false;
         socket.emit('leaveGame');
      
         //Rem: setState works asynchronously so we need to use a callback:
@@ -591,9 +550,7 @@ var Connect4 = React.createClass({
       <div id="container">
         
         <div className="content game" >
-            <div>opponentType: {this.state.game.opponentType}</div>
-            <div>Me: {this.state.game.pseudo}</div>
-            <div>My opponent: {this.state.game.opponent}</div>
+            {debug ? <Debug game={this.state.game}/>: null }
             <SettingZone 
               game = {this.state.game} 
               onClickDifficulty = {this.handleChangeDifficulty}
@@ -607,7 +564,17 @@ var Connect4 = React.createClass({
 });
 
 
-//<GameZone game={this.state.game} onUserclick={this.handleUserClick} onClickDifficulty={this.handleChangeDifficulty}/>
+var Debug = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <div>opponentType: {this.props.game.opponentType}</div>
+        <div>Me: {this.props.game.pseudo}</div>
+        <div>My opponent: {this.props.game.opponent}</div>    
+      </div>
+    );
+  }
+});
 
 // ReactDOM.render(
 //   <Connect4 />,
@@ -618,9 +585,6 @@ var Connect4 = React.createClass({
 
 //What gets displayed inside App is controlled by the result of this.props.children instead of a hard-coded component.
 var App = React.createClass({
-  // componentDidMount: function() {
-
-  // },  
 
   render: function() {
     var items = [
@@ -665,10 +629,6 @@ ReactDOM.render(
   </Router>,
   document.getElementById('container')
 );
-
-
-
-
 
 
 // var UserGist = React.createClass({
