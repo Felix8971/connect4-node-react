@@ -1,7 +1,8 @@
 # connect4-node-react
-Connect 4 responsive game implemented with React and NodeJS.
-You can play against an artificial intelligence with 5 differents difficulty levels.
+Connect 4 responsive game implemented with React and NodeJS and socket.io.
 
+You can play against a another player or an artificial intelligence with 5 differents difficulty levels.
+  
 ### Pre-requirements
 - node & npm
 

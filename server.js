@@ -6,25 +6,23 @@ var app = express();
 var server = require('http').Server(app);
 
 // initializing express-session middleware
-var Session = require('express-session');
-var SessionStore = require('session-file-store')(Session);
-var session = Session({store: new SessionStore({path: __dirname+'/sessions'}), secret: 'pass', resave: true, saveUninitialized: true});
+// var Session = require('express-session');
+// var SessionStore = require('session-file-store')(Session);
+// var session = Session({store: new SessionStore({path: __dirname+'/sessions'}), secret: 'pass', resave: true, saveUninitialized: true});
 
-
-
-var COMMENTS_FILE = path.join(__dirname, 'comments.json');
+//var COMMENTS_FILE = path.join(__dirname, 'comments.json');
 
 var port = process.env['PORT'] || 3000;
 
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(session);
+//app.use(session);
 
 // voir https://github.com/xpepermint/socket.io-express-session/tree/master/example
 var ios = require('socket.io-express-session');
 var io = require('socket.io')(server);
-io.use(ios(session)); // session support
+//io.use(ios(session)); // session support
 db = require('./db');//module à part pour gerer les acces bdd
 var url_mongo = 'mongodb://localhost:27017/connect4';//27017 est le port par defaut pour mongodb si on ne le precise pas. On peut passer plusieurs hotes pour acceder à des bases sur plusieures serveurs
 var players = {};

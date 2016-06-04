@@ -5136,7 +5136,7 @@ var Connect4 = React.createClass({
       if (value === "robot") {
 
         that.state.game.connected = false;
-        socket.emit('deconnection');
+        socket.emit('leaveGame');
 
         //Rem: setState works asynchronously so we need to use a callback:
         this.setState({ game: new C4Fct.game(this.state.game.level) }, function () {
