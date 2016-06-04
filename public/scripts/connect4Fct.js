@@ -1,5 +1,5 @@
 //Add new disc on connect4's grid
-var Connect4Fct = {
+var C4Fct = {
   
   arrayToString: function(array){
     var n = array.length;
@@ -22,9 +22,30 @@ var Connect4Fct = {
     return array[index];
   },
 
+
+  isPseudoUsed: function (pseudo, players){
+    console.log('isPseudoUsed');
+    for ( var prop in players) {
+      console.log("x=",players[prop].pseudo);
+      if( players[prop].pseudo === pseudo){
+        return true;
+      }
+    }
+    return false;
+  },
+
+  displayPlayers:  function (players){
+    console.log("--- Players --- :");
+    for ( var prop in players) {
+      console.log(players[prop].pseudo);
+    }
+  },
+
   game: function(level){
+        this.pseudo = null,
+        this.connected = false,
         this.opponentType = "robot"; //can be "robot" ou "human" 
-        this.opponent= "Felix8971";
+        this.opponent= null;
         this.level = level || "normal";
         this.nbMove = 0;
         this.winner = 0;
@@ -32,14 +53,21 @@ var Connect4Fct = {
         this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 random
         this.classNames = ["noDisc","redDisc","blueDisc"];
         this.url = "http://connect4.gamesolver.org/solve?";
-        this.players = [
+        this.players = {
+          
+          // '5eUFX6S3LiBtl7FWAAAA': { 
+          //   pseudo: 'guest_456',
+          //   sid: '5eUFX6S3LiBtl7FWAAAA',
+          //   dispo: true,
+          //   img: 'human.png'
+          // }
           // { name:"Toto125", id:1, img:"human.png" } ,
           // { name:"Felix8971", id:2 , img:"human.png" },
           // { name:"GrosMinet", id:3 , img:"human.png"  },
           // { name:"aaaaaa", id:4, img:"human.png" } ,
           // { name:"bbbbbbbbb", id:5 , img:"human.png" },
           // { name:"cccc", id:6 , img:"human.png"  },          
-        ];
+        };
 
         this.position = [];//list of column's numbers successively played, first column is 1
         this.grid = [//game map
@@ -91,7 +119,7 @@ var Connect4Fct = {
   },
 
   /**
-   *  Dans le tableau retourné parConnect4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
+   *  Dans le tableau retourné par C4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
    *  en fonction du niveau de jeu et du nombre de choix possibles
   **/  
   getRankToPLayFromLevelAndNbrChoices : {
@@ -118,8 +146,7 @@ var Connect4Fct = {
 
   // computerMove: function(_this){
   //   var game = _this.state.game;
-  //   var pos = Connect4Fct.arrayToString(game.position);
-    
+  //   var pos = C4Fct.arrayToString(game.position);
   //   $.ajax({
   //     url: game.url,
   //     data:{pos:pos},
@@ -127,49 +154,6 @@ var Connect4Fct = {
   //     cache: false,
   //     success: function(data) {
   //       console.log("data with jquery:",data);
-        
-  //       // data.score = score for each playable column: winning moves have a positive score and losing moves 
-  //       // have a negative score. The absolute value of the score gives you the number of moves 
-  //       // before the end of the game. Hence best moves have highest scores. 
-  //       // score of 100 on a column means that the column is full. 
-  //       var array = data.score;
-      
-  //       var stat = Connect4Fct.getArrayStat(array);
-  //       var n = stat.length;
-  //       //alert(n);
-  //       //console.log('stat:',stat);
-  //       var columnPlayed;
-
-  //       //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
-  //       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-  //       var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
-
-  //       //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
-  //       columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
-       
-  //       var lastMove = Connect4Fct.addDisc(game, columnPlayed);
-  //       game.nbMove++;
-        
-  //       //we update the game state
-  //       _this.forceUpdate();    
-  //       //_this.setState({ game : game });
-
-  //       var win = Connect4Fct.testWin(game, lastMove);
-
-
-  //       if ( win ){//computer win
-  //         game.winner = 1;
-  //         game.turn = 0;     
-  //         alert("You loose!");
-  //       }else{//pass turn to user
-  //         if ( this.state.game.nbMove == 42 ){
-  //           alert("draw 0-0 !");
-  //         }
-  //         game.turn = 2;
-  //         //this.state.game.turn = 2;             
-  //       }
-  //       //_this.setState({ game : game }); 
-  //       _this.forceUpdate();    
   //     }.bind(_this),
   //     error: function(xhr, status, err) {
   //       console.error(_this.props.url, status, err.toString());
@@ -181,7 +165,7 @@ var Connect4Fct = {
 
   computerMove: function(_this){
     var game = _this.state.game;
-    var pos = Connect4Fct.arrayToString(game.position);
+    var pos = C4Fct.arrayToString(game.position);
     //var pos ="32";
     //console.log('pos=',pos);
    
@@ -199,27 +183,27 @@ var Connect4Fct = {
       // score of 100 on a column means that the column is full. 
       var array = data.score;
     
-      var stat = Connect4Fct.getArrayStat(array);
+      var stat = C4Fct.getArrayStat(array);
       var n = stat.length;
       //alert(n);
       //console.log('stat:',stat);
       var columnPlayed;
 
-      //console.log("easy and nb choice " + n + ": "+Connect4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
+      //console.log("easy and nb choice " + n + ": "+C4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-      var rank = Connect4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+      var rank = C4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
 
-      //columnPlayed = Connect4Fct.getRandomElementInArray(stat[n-1].positions);
-      columnPlayed = Connect4Fct.getRandomElementInArray(stat[rank].positions);
+      //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
+      columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
      
-      var lastMove = Connect4Fct.addDisc(game, columnPlayed);
+      var lastMove = C4Fct.addDisc(game, columnPlayed);
       game.nbMove++;
       
       //we update the game state
       _this.forceUpdate();    
       //_this.setState({ game : game });
 
-      var win = Connect4Fct.testWin(game, lastMove);
+      var win = C4Fct.testWin(game, lastMove);
 
       if ( win ){//computer win
         game.winner = 1;
@@ -236,7 +220,7 @@ var Connect4Fct = {
       _this.forceUpdate();          
     }.bind(_this) )
     .catch(function(error) {
-      console.log('There has been a problem with your fetch operation: ' + error.message);
+      console.log('There has been a problem with your fetch operation 4: ' + error.message);
     });
 
   },
@@ -283,7 +267,7 @@ var Connect4Fct = {
     var test_alignment_EW = function(game, lastMove, optionCheck){
       var nbAlignedDisc = 1;
       //horizontal right direction
-      //Connect4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
+      //C4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
       for(var k=1;k<=3;k++){
         if ( lastMove.col+k < 7 ){
           if ( game.grid[lastMove.col+k][lastMove.line+0] === lastMove.turn){
@@ -297,7 +281,7 @@ var Connect4Fct = {
         }
       }
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
-      //Connect4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
+      //C4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
       
       //horizontal left direction
       for(var k=1;k<=3;k++){
@@ -446,7 +430,53 @@ var Connect4Fct = {
     }
   },
 
+
+  // getData: function(url, callback){
+  //   var options = { method: 'GET' };
+  //   fetch(url, options).then(function(res) {
+  //     return res.json();
+  //   })
+  //   .then(function(data){
+  //     console.log("data=",data);
+  //     callback(data);        
+  //   })
+  //   .catch(function(error) {
+  //     console.log('There has been a problem with your fetch operation 3: ' + error.message);
+  //   }); 
+  // },
+
+  getPlayers: function(callback){
+    var options = { method: 'GET' };
+    fetch("/api/getplayers", options).then(function(res) {
+      return res.json();
+    })
+    .then(function(data){
+      //console.log("players recue=",data);
+      callback(data);        
+    })
+    .catch(function(error) {
+      console.log('There has been a problem with your fetch operation 2: ' + error.message);
+    }); 
+  },
+
+
+  // getOpponent: function(pseudo, callback){
+  //   //----- Find an opponent for pseudo ------
+  //   //Notice that if players change we will be inform by the server (it will send a "addPlayer" socket)
+  //   //we fetch the server here to choose server side the opponent for pseudo
+  //   var options = { method: 'GET' };
+  //   fetch("/api/getopponent/"+pseudo, options).then(function(res) {
+  //     return res.json();
+  //   }).then(function(data){
+  //     callback(data);   
+  //   })
+  //   .catch(function(error) {
+  //     console.log('There has been a problem with your fetch operation 1: ' + error.message);
+  //   });
+
+  // },
+
 };
 
 
-module.exports = Connect4Fct;
+module.exports = C4Fct;
