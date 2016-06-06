@@ -49,7 +49,7 @@ var MenuBar = React.createClass({
 
 var ChooseMode = React.createClass({
   handleChange: function(event) {
-    console.log('id:',event.currentTarget.id);
+    //console.log('id:',event.currentTarget.id);
     this.props.onClickOpponentType(event.currentTarget.id);
   },    
   render: function() {
@@ -243,7 +243,7 @@ var Loader = React.createClass({
 var SettingZone = React.createClass({
 
   handleClick: function(event) {
-    console.log(event.currentTarget.id);
+    //console.log(event.currentTarget.id);
     this.props.onClickDifficulty(event.currentTarget.id);
   },
 
@@ -400,9 +400,9 @@ var Connect4 = React.createClass({
     // });
    
     socket.on('startGame', function (player1, player2){
-      console.log('--- startGame signal ! --- ');
-      console.log("Me:",player1);
-      console.log("my opponent:",player2);
+      //console.log('--- startGame signal ! --- ');
+      //console.log("Me:",player1);
+      //console.log("my opponent:",player2);
 
       self.state.game.turn = 1;//because 1 always start
       self.state.game.me = player1;
@@ -494,7 +494,7 @@ var Connect4 = React.createClass({
 
   //Choose between robot or human opponent type
   handleChangeOpponentType: function(value){
-    console.log("handleChangeOpponentType:",value);
+    //console.log("handleChangeOpponentType:",value);
 
     var that = this;
 
@@ -513,15 +513,15 @@ var Connect4 = React.createClass({
           if ( pseudo.trim().length > 0 ){
             that.state.game.pseudo = pseudo; 
             C4Fct.getPlayers(function(players){
-              console.log('players===>',players);
+              //console.log('players===>',players);
               if ( !C4Fct.isPseudoUsed(pseudo, players) ){
 
-                console.log("pseudo valid:",pseudo);         
+                //console.log("pseudo valid:",pseudo);         
                 that.updatePseudo(pseudo);
                 //that.updatePlayers(players);
                 //that.state.game.players = players;
                 that.forceUpdate();
-                console.log("****");   
+                //console.log("****");   
 
                 //ne fonctinnera pas si le user est deconnécté de la socket
                 socket.emit('addPlayer', pseudo);//we ask the server to add a new user to the users list
@@ -544,7 +544,7 @@ var Connect4 = React.createClass({
          that.forceUpdate();      
         //Rem: setState works asynchronously so we need to use a callback:
         that.setState({ game : new C4Fct.game(that.state.game.level) }, function(){
-          console.log("turn:",that.state.game.turn);
+          //console.log("turn:",that.state.game.turn);
           //that.state.game.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
 
           if ( that.state.game.turn === 1 ){//faire jouer la machine    
@@ -559,11 +559,11 @@ var Connect4 = React.createClass({
   },
 
   handleUserClick: function(col) {
-    console.log('handleUserClick');
+    //console.log('handleUserClick');
 
     //turn = 1 means it's computers turn to play, code = 2 means user can play, turn = null means we are out of the game    
     if ( this.state.game.opponentType === "robot"){
-      console.log('handleUserClick robot');
+      //console.log('handleUserClick robot');
       switch(this.state.game.turn){
           case 1:
             alert("It's not your turn...");
@@ -612,7 +612,7 @@ var Connect4 = React.createClass({
               var self = this;
               //Rem: setState works asynchronously so we need to use a callback to launch the game:
               this.setState({ game : new C4Fct.game(this.state.game.level) }, function(){
-                console.log("turn:",self.state.game.turn);
+                //console.log("turn:",self.state.game.turn);
                 if ( self.state.game.turn === 1 ){//faire jouer la machine    
                   C4Fct.computerMove(self);
                 }else{
@@ -626,7 +626,7 @@ var Connect4 = React.createClass({
       }
     }else if(this.state.game.opponentType === "human"){
 
-      console.log('handleUserClick human');
+      //console.log('handleUserClick human');
       if ( this.state.game.turn ){ 
         if ( this.state.game.turn != this.state.game.me.turnId ){
           alert("It's not your turn...");
