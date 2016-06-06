@@ -10,9 +10,13 @@ You can play against a another player or an artificial intelligence with 5 diffe
 
 1. `cd` into your project directory.
 2. run `npm install`
-3. run `npm run build` 
-4. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
-4. visit <http://localhost:3000/>
+3. run 'gulp'
+4. run `npm run build` 
+5. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
+6. visit <http://localhost:3000/>
+
+
+voir partie scripts dans package.json : app.js est crée à partie de main.js grace à Browserify (npm install -g browserify)
 
 ### Artificial intelligence part
 This game used the "alpha beta pruning" algorithm developed by Mr Pascal Pons (https://www.linkedin.com/in/pascalpons)

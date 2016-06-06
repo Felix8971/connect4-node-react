@@ -25,13 +25,15 @@ var io = require('socket.io')(server);
 //io.use(ios(session)); // session support
 db = require('./db');//module à part pour gerer les acces bdd
 var url_mongo = 'mongodb://localhost:27017/connect4';//27017 est le port par defaut pour mongodb si on ne le precise pas. On peut passer plusieurs hotes pour acceder à des bases sur plusieures serveurs
-var players = {};
+
+var players = {};//players list
+var games = {};//liste of the current games
+
 var _socket = null;
 
-
-setInterval(function(){
-  console.log('players list=>',players);
-},4000);
+// setInterval(function(){
+//   console.log('players list=>',players);
+// },4000);
 
 //players["s6546r5f4"] = { pseudo:"toto", sid:"s6546r5f4", dispo:true, opponent_sid:null, img:'human.png' };
 
@@ -52,14 +54,12 @@ app.get('/api/getplayers', function(req, res) {
 });
 
 
-
 db.connect(url_mongo, function(err){
   if (err) {
-      console.log('Impossible de se connecter à la base de données Connect4.');
-      process.exit(1);
+    console.log('Cannot connect to mongo database Connect4 !');
+    process.exit(1);
   }
 });
-
 
 // Socket.IO part used for multiplayer game
 
@@ -78,15 +78,24 @@ var try2LaunchGame = function(){
           players[player2.sid].dispo = false;
           players[player2.sid].opponent_sid = player1.sid;
           
+          //we choose randomely who play first ( Rem: 1 will always play first ) 
+          players[player1.sid].turnId = 1 + Math.floor(2*Math.random());// equal 1 or 2 (randomely)
+          players[player2.sid].turnId = 3 - players[player1.sid].turnId;// equal 1 or 2 depending on players[player1.sid].turnId value
+          
+
+          //games[player1.sid+player2.sid] = 
           //we tell the 2 players that the game start
           var socket;
           
           socket = clients[player1.sid];
-          socket.emit('start-game',player2.sid, players);
+          socket.emit('startGame', player1, player2);
           
           socket = clients[player2.sid];
-          socket.emit('start-game',player1.sid, players);
-         
+          socket.emit('startGame', player2, player1);
+
+          console.log('player1.sid='+player1.sid);
+          console.log('player2.sid='+player2.sid);
+
           break;
         }
       }
@@ -94,56 +103,97 @@ var try2LaunchGame = function(){
   }   
 }
 
- //io.sockets.emit('majPlayers', players);//send to all clients
+var removeOpponentsLink = function(sid){
+  if ( typeof players[sid] != "undefined" ){
+    //if socket.id was playing we declare his opponent available so that he could be pick up by the server to play again
+    //if his opponeent is define we remove sid as an opponent
+    var op_sid = players[sid].opponent_sid;
+    if ( op_sid ){
+      if ( typeof players[op_sid] != "undefined" ){
+        players[op_sid].dispo = true;
+        players[op_sid].opponent_sid = null;
+      }
+    }
+  }  
+};
+
+var deletePlayer = function(sid){
+  removeOpponentsLink(sid);
+  if ( typeof players[sid] != "undefined" ){
+    delete players[sid];
+  }
+  if ( typeof clients[sid] != "undefined" ){
+    delete clients[sid];
+  }
+};
+
+var inactivatePlayer = function(sid){
+  removeOpponentsLink(sid);
+  if ( typeof players[sid] != "undefined" ){
+    players[sid].dispo = false;
+    players[sid].pseudo = null;
+  }  
+};
 
 
+var clients = {};//we will store the socket object in this array for each client
 
-//We look every second if we find 2 players available for a game, if so we start the game
-//setInterval(function(){
-  //io.sockets.emit('majPlayers', players);//send to all clients
-  //try2LaunchGame();
-//},1000);
-
-
-var clients = {};
-
-io.on('connection', function (socket) {
-  
+io.on('connection', function (socket){
+  console.log('New client connected!');
   //_socket =  socket;//_socket will be is available inside routes if needed
 
   clients[socket.id] = socket;
 
-  console.log('New client connected!');
-  //socket.emit("connection");
-  //we send the users list to the client when he arrives
-  //io.sockets.emit('majPlayers', players);
-
-  console.log('players=',players);
+  players[socket.id] = { 
+    sid:socket.id,
+    pseudo:null,
+    dispo:false,
+    turnId: null,
+    opponent_sid:null,
+    img:'human.png'
+  };
 
   socket.on('addPlayer', function (pseudo) {
     console.log('addPlayer '+pseudo);
-    players[socket.id] = { pseudo:pseudo, sid:socket.id, dispo:true, opponent_sid:null, img:'human.png' };
-    console.log('players list=',players);
+    players[socket.id].pseudo = pseudo;
+    players[socket.id].dispo = true;
+    //console.log('players list=',players);
     //socket.handshake.session.pseudo = pseudo;
-    io.sockets.emit('majPlayers', players);//send to all clients
+    //io.sockets.emit('players', players);//send to all clients when a new client arrive
     try2LaunchGame();
   });
   
+  socket.on('disconnect', function(){ 
+    console.log('disconnect');
+    deletePlayer(socket.id);
+
+    //prevenir adversaire !!!!!
+    //io.sockets.emit('players', players);//send to all clients
+  });
+
   //if a user leave the game we remove him from users list and we inform other clients
   socket.on('leaveGame', function(){
-    if ( typeof players[socket.id] != "undefined" ){
-      //if socket.id was playing we declare his opponent available so that he could be pick by the server to play again
-      if ( players[socket.id].opponent_sid ){
-        players[players[socket.id].opponent_sid].dispo = true;
-        players[players[socket.id].opponent_sid].opponent_sid = null;
-      }
+    console.log('leaveGame');
+    var osid = players[socket.id].opponent_sid;
+    //prevenir players[socket.id].opponent_sid que socket.id quitte la partie
+    if ( osid ){
+      clients[osid].emit('opponentResign');
     }
-    delete players[socket.id];
-    console.log('players=',players);
-    io.sockets.emit('majPlayers', players);//send to all clients 
-    //io.sockets.emit('remove-player', socket.id);//send to all clients 
+    inactivatePlayer(socket.id);
+    //console.log('players=',players);
+    //io.sockets.emit('players', players);//send to all clients when a client leave the 'Human mode'
   });  
 
+
+  socket.on('addDisc', function(col){
+    //console.log('addDisc on col '+ col);
+    //socket.id add a disc
+    var osid = players[socket.id].opponent_sid;
+    //prevenir players[socket.id].opponent_sid que socket.id quitte la partie
+    if ( osid ){
+      clients[osid].emit('addDisc',col);
+    } 
+  });  
 
 });
 

@@ -42,31 +42,21 @@ var C4Fct = {
   },
 
   game: function(level){
-        this.pseudo = null,
-        this.opponentType = "robot"; //can be "robot" ou "human" 
-        this.opponent= null;
+        this.pseudo = null;
+        //this.myTurnId = null,//user turn id, can be 1 or 2 (or null before and after the game) 
+        this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
+        //we define it client side only in the case of a game against computer 
+
+        this.opponentType = "robot"; //can be "robot" ou "human"
         this.level = level || "normal";
         this.nbMove = 0;
         this.winner = 0;
-        this.gameInProgress = false;
-        this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 random
+        
         this.classNames = ["noDisc","redDisc","blueDisc"];
         this.url = "http://connect4.gamesolver.org/solve?";
-        this.players = {
-          
-          // '5eUFX6S3LiBtl7FWAAAA': { 
-          //   pseudo: 'guest_456',
-          //   sid: '5eUFX6S3LiBtl7FWAAAA',
-          //   dispo: true,
-          //   img: 'human.png'
-          // }
-          // { name:"Toto125", id:1, img:"human.png" } ,
-          // { name:"Felix8971", id:2 , img:"human.png" },
-          // { name:"GrosMinet", id:3 , img:"human.png"  },
-          // { name:"aaaaaa", id:4, img:"human.png" } ,
-          // { name:"bbbbbbbbb", id:5 , img:"human.png" },
-          // { name:"cccc", id:6 , img:"human.png"  },          
-        };
+        
+        this.me = {};
+        this.opponent = {};
 
         this.position = [];//list of column's numbers successively played, first column is 1
         this.grid = [//game map
@@ -206,7 +196,7 @@ var C4Fct = {
 
       if ( win ){//computer win
         game.winner = 1;
-        game.turn = 0;     
+        game.turn = null;     
         alert("You loose!");
       }else{//pass turn to user
         if ( this.state.game.nbMove == 42 ){

@@ -23,15 +23,16 @@ var node,
 //   });
 // });
 
-
-gulp.src('public/css/*.css')
-  .pipe(cssmin())
-  .pipe(concat('main.css'))
-  .pipe(rename({suffix: '.min'}))
-  .pipe(gulp.dest('public/css/'));
+gulp.task('css', function() {
+  gulp.src('public/css/css/*.css')
+    .pipe(cssmin())
+    .pipe(concat('main.css'))
+    .pipe(rename({suffix: '.min'}))
+    .pipe(gulp.dest('public/css/'));
+});
 
 //concat && minify js in 1 file 
-gulp.task('js', function() {//we’re defining a task named js
+gulp.task('js_lib', function() {//we’re defining a task named js
   gulp.src([pathLib+'react.min.js',
             pathLib+'react-dom.min.js',
             pathLib+'browser.min.js',
@@ -41,8 +42,16 @@ gulp.task('js', function() {//we’re defining a task named js
           ])
     .pipe(concat('lib.min.js'))
     .pipe(uglify())
-    .pipe(gulp.dest('./public/lib/'))
+    .pipe(gulp.dest('./public/lib/'));
 });
+
+//concat && minify js in 1 file 
+// gulp.task('js_app', function() {//we’re defining a task named js
+//   gulp.src([pathJs+'app.js'])
+//     .pipe(concat('app.min.js'))
+//     .pipe(uglify())
+//     .pipe(gulp.dest('./public/scripts/'));
+// });
 
 // karma test
 //gulp.task('test', function(){
@@ -60,16 +69,15 @@ gulp.task('js', function() {//we’re defining a task named js
 //});
 
 // default init task which compress js && launch the server && set a watcher for js modifications
-gulp.task('default', ['js'], function() {//A task may also be a list of other tasks.
+gulp.task('default', ['css','js_lib'], function() {//A task may also be a list of other tasks.
 	//gulp.start('server');
-	gulp.watch(['./scripts/*.js'], function() {
-		gulp.start('js')
-	});
-  console.log("xx");
-  // gulp.watch(['./script/*.js'], function() {
-  //   gulp.start('server')
-  // });
-  // gulp.watch(['./css/*.css'], function() {
+	// gulp.watch(['public/lib/*.js'], function() {
+	// 	gulp.start('js_lib')
+	// });
+ //  gulp.watch(['public/scripts/*.js'], function() {
+ //    gulp.start('js_app')
+ //  });
+  // gulp.watch(['public/css/*.css'], function() {
   //   gulp.start('css')
   // });
 });

@@ -7,8 +7,6 @@ var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
 var debug = false;
 
-
-
 var MenuBar = React.createClass({
 
     getInitialState: function(){
@@ -102,11 +100,28 @@ var Mask = React.createClass({
         </div>
       );
     });
-    var turn = this.props.game.turn;
+   
+   
+    var loader = false;
+
+    if ( this.props.game.opponentType === 'robot' ){
+      if ( this.props.game.turn === 1 ){
+        loader = true;
+      }
+    }
+    if ( this.props.game.opponentType === 'human' ){
+      if ( this.props.game.turn != this.props.game.me.turnId ){
+        loader = true;
+      }
+    }
+
     return (
       <div id="mask">
         
-        {turn === 0 ?  <div id="playAgain" onClick={that.playAgain}>Click to play again</div>  : null }
+        { this.props.game.turn === null && this.props.game.opponentType === 'robot' ?  <div id="playAgain" onClick={that.playAgain}>Click to play again</div>  : null }
+        
+        { loader ?  <div id="wait"><img id="loader" src="images/loading_apple.gif" alt="Please wait..."/></div> : null }
+
         {columns}
         <NextTurnDisplay 
           turn={this.props.game.turn} 
@@ -140,6 +155,8 @@ var ColumnMask = React.createClass({
   }
 });
 
+
+//{turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
 var NextTurnDisplay = React.createClass({
   render: function() {
     var classNames = ["smallNoDisc","smallRedDisc","smallBlueDisc"];
@@ -147,7 +164,7 @@ var NextTurnDisplay = React.createClass({
     return (
       <div>
         <div id="next-turn">Next turn: 
-          {turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
+          <div className={classNames[turn]}></div>
         </div>
         <div id="difficulty">Difficulty: {this.props.level}</div>
         <div id="winner">Winner: 
@@ -193,7 +210,6 @@ var ColumnGrid = React.createClass({
     var aligned = this.props.aligned;
 
     var squares = this.props.column.map(function(square) {
-      //line--;
       line++
       var id = col.toString()+"-"+line.toString();
       var idSquare = "square-"+id;
@@ -225,31 +241,6 @@ var Loader = React.createClass({
 
 
 var SettingZone = React.createClass({
-
-  // getInitialState: function() {
-  //   return {
-  //     windowWidth: window.innerWidth
-  //   };
-  // },
-
-  // handleResize: function(e) {
-  //   this.setState({windowWidth: window.innerWidth});
-  //   console.log("windowWidth=",this.state.windowWidth);
-  //   console.log("maskHeight=",document.getElementById('mask').Width);
-  // },
-
-  //componentDidMount: function() {
-    //window.addEventListener('resize', this.handleResize);
-  //},
-
-  //componentWillUnmount: function() {
-    //window.removeEventListener('resize', this.handleResize);
-  //},
-
-  // render: function() {
-  //   var style = {visibility:'hidden'};
-  //   return <div style={style}>Current window width: {this.state.windowWidth}</div>;
-  // }
 
   handleClick: function(event) {
     console.log(event.currentTarget.id);
@@ -295,25 +286,53 @@ var SettingZone = React.createClass({
 
         case 'human':
 
-          var players = this.props.game.players;
+          //var players = this.props.game.players;
           var playerRows = [];
-          //C4Fct.displayPlayers(players);
+          var classNames = ["smallNoDisc","smallRedDisc","smallBlueDisc"];
 
-          for ( var prop in players) {
-             console.log(players[prop]);
-             var player = players[prop];
-             var className = this.props.game.opponent === player.pseudo ? 'player-block selected' : 'player-block';
-             if ( player.pseudo != this.props.game.pseudo ){
-               playerRows.push( 
-                <div key={player.sid} className={className} id={player.sid} >
-                  <div className="robotFrame">
-                    <img className="player-img" src={"images/" + player.img}/>
-                  </div>
-                  <div className="info">{player.pseudo}</div>
+          // var style = '';
+
+          // //C4Fct.displayPlayers(players);
+          // //<img className="player-img" src={"images/" + player.img}/>
+          // for ( var prop in players) {
+          //    console.log(players[prop]);
+          //    if ( players[prop].pseudo ){
+          //     var player = players[prop];
+
+          //     var style;
+          //     if ( this.props.game.opponent === player.pseudo ){
+          //       style = classNames[3-this.props.game.myTurnId];
+          //     }else{
+          //       style = "smallNoDisc";
+          //     }
+               
+          //      var className = this.props.game.opponent === player.pseudo ? 'player-block selected' : 'player-block';
+          //      if ( player.pseudo != this.props.game.pseudo ){
+          //        playerRows.push( 
+          //         <div key={player.sid} className={className} id={player.sid} >
+          //           <div className="discFrame">
+          //             <div className={style}></div>
+          //           </div>
+          //           <div className="pseudo">{player.pseudo}</div>
+          //         </div>
+          //       );
+          //     } 
+          //   }
+          // } 
+          var opponent = this.props.game.opponent;
+          var style;
+           
+          if ( typeof opponent.sid != "undefined" ){
+             style = classNames[3-this.props.game.me.turnId];
+             playerRows.push( 
+              <div key={opponent.sid} className={className} id={opponent.sid} >
+                <div className="discFrame">
+                  <div className={style}></div>
                 </div>
-              );
-            } 
-          } 
+                <div className="pseudo">{opponent.pseudo}</div>
+              </div>
+            );
+          }
 
           return (
             <div id="settingZone">
@@ -349,6 +368,7 @@ var Connect4 = React.createClass({
   componentDidMount: function() {
     var self = this;
     if ( self.state.game.opponentType === "robot"){
+    //that.state.game.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
       //Let the computer play     
       setTimeout(function(){
         if ( self.state.game.turn === 1 ){
@@ -359,30 +379,99 @@ var Connect4 = React.createClass({
       },2000);
     }
 
+    // socket.on('players', function (players) {
+    //   console.log('players');
+    //   self.state.game.players = players;
 
-    socket.on('majPlayers', function (players) {
-      console.log('majPlayers');
-      self.state.game.players = players;
+    //   //si l'opponent courant de pseudo est parti on reinitialise le jeu
+    //   if ( self.state.game.opponent ){
+    //     if ( !C4Fct.isPseudoUsed(self.state.game.opponent,players) && self.state.game.opponentType === "human" ){
+    //       alert("Your opponent is gone (You win!)");
+    //       self.state.game = new C4Fct.game();
+    //     }
 
-      //si l'opponent courant de pseudo est parti on reinitialise le jeu
-      if ( self.state.game.opponent ){
-        if ( !C4Fct.isPseudoUsed(self.state.game.opponent,players) && self.state.game.opponentType === "human" ){
-          alert("Your opponent is gone (You win!)");
-          self.state.game = new C4Fct.game();
-        }
-      }
+    //     if ( !players[self.state.game.opponentSid].dispo ){
+    //       alert("Your opponent is gone (You win!)");
+    //       self.state.game = new C4Fct.game();
+    //     }
+    //   }
 
-      self.forceUpdate();
-    });
+    //   self.forceUpdate();
+    // });
    
-    socket.on('start-game', function (sid, players){
-      alert('start-game with '+players[sid].pseudo);
-      console.log(players);
+    socket.on('startGame', function (player1, player2){
+      console.log('--- startGame signal ! --- ');
+      console.log("Me:",player1);
+      console.log("my opponent:",player2);
+
+      self.state.game.turn = 1;//because 1 always start
+      self.state.game.me = player1;
+      self.state.game.opponent = player2;
+      
+      self.state.game.nbMove = 0;
+      self.state.game.position = [];//list of column's numbers successively played, first column is 1
+      self.state.game.grid = [//game map
+          [0, 0, 0, 0, 0, 0],//first column (grid's top first)
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+        ];
+      self.state.game.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+        ];
+
+      self.forceUpdate(); 
     });
 
-    //socket.on('connection', function (sid, players){
-      //self.state.game.connected = true;
-    //});
+    socket.on('opponentResign', function (){
+      alert('opponentResign');
+      self.state.game.me = {};
+      self.state.game.opponent = {};
+      self.forceUpdate();       
+    });
+
+
+    socket.on('addDisc', function (col){
+      //alert('my opponent add a disc on col '+col);
+
+      var lastMove = C4Fct.addDisc(self.state.game, col);
+      //console.log('lastMove=',lastMove); //console.log('game=',game); 
+      self.state.game.nbMove++;
+      self.forceUpdate();
+
+      //it is a winning move ?
+      var win = C4Fct.testWin(self.state.game, lastMove);
+      if ( win ){
+        self.state.game.winner = 3-self.state.game.me.turnId;
+        self.state.game.turn = null;
+        self.forceUpdate(function(){
+          alert("You loose!");
+          //reinit the game
+          self.state.game = new C4Fct.game();
+          this.state.game.turn = null;
+          self.forceUpdate(); 
+        });   
+      }else if( self.state.game.nbMove == 42 ){//if no winner and grid full then draw game 
+        self.state.game.turn = null;
+        alert("draw 0-0 !");
+        //reinit the game
+        self.state.game = new C4Fct.game();
+        self.forceUpdate();            
+      } 
+
+      self.state.game.turn = self.state.game.me.turnId;
+      self.forceUpdate();       
+    });
+
 
   },  
 
@@ -393,72 +482,6 @@ var Connect4 = React.createClass({
     };
   },
   
-  handleUserClick: function(col) {
-    console.log('handleUserClick');
-    if ( this.state.game.opponentType === "robot"){
-      console.log('handleUserClick robot');
-      switch(this.state.game.turn) {
-          case 2://if user is allowed to play 
-            //the user plays
-            var lastMove = C4Fct.addDisc(this.state.game, col);
-            if ( !lastMove ){ 
-              alert("This column is full!");
-              return;
-            }; 
-            //console.log('lastMove=',lastMove); //console.log('game=',game); 
-            this.state.game.nbMove++;
-            this.forceUpdate();
-
-            //it is a winning move ?
-            var win = C4Fct.testWin(this.state.game, lastMove);
-            if ( win ){
-              this.state.game.winner = 2;
-              this.state.game.turn = 0;
-              this.forceUpdate();     
-              //this.setState({ game : game });
-              alert("You win!");
-            }else{//IA'S turn to play
-
-              //if no winner and grid full then draw game 
-              if ( this.state.game.nbMove == 42 ){
-                this.state.game.turn = 0;
-                alert("draw 0-0 !");
-                this.forceUpdate();  
-              }else{
-                this.state.game.turn = 1;
-                //get actual connect 4 game position in string notation       
-                var pos = C4Fct.arrayToString(this.state.game.position);
-                //console.log("pos=",pos);
-
-                //get the solution from Pascal Pons "alpha beta pruning" algorithm 
-                C4Fct.computerMove(this);
-              }
-            }            
-            break;
-          case 1:
-            alert("It's not your turn...");
-            break;
-          case 0:
-            //var rep = confirm("Play again ?");
-            //if (rep){
-              var self = this;
-              //Rem: setState works asynchronously so we need to use a callback:
-              this.setState({ game : new C4Fct.game(this.state.game.level) }, function(){
-                console.log("turn:",self.state.game.turn);
-                if ( self.state.game.turn === 1 ){//faire jouer la machine    
-                  C4Fct.computerMove(self);
-                }else{
-                  //no code here because this.handleUserClick() will be called on the click event
-                }
-              });
-            //}
-            break;
-          default:
-            alert("an error");
-      }
-    } 
-  },
-
   handleChangeDifficulty: function(value){
     this.state.game.level = value;
     this.forceUpdate();
@@ -466,11 +489,6 @@ var Connect4 = React.createClass({
 
   updatePseudo: function(pseudo){
     this.state.game.pseudo = pseudo;
-    this.forceUpdate();
-  },
-
-  updateOpponent: function(opponent){
-    this.state.game.opponent = opponent;
     this.forceUpdate();
   },
 
@@ -488,15 +506,9 @@ var Connect4 = React.createClass({
       that.state.game.opponentType = value;
 
       if ( value === "human"){
-
-        if ( that.state.game.connected ){
-          alert("cas forceNew");
-          io.connect(SERVER_IP,{'forceNew':true });
-        }
-
         //If user doesn't have a pseudo we ask him to choose one (a default pseudo is given anyway)
         while ( !that.state.game.pseudo ){
-          var pseudo = prompt("Choose a pseudo please","guest_"+C4Fct.getRandomIntInclusive(1,999999));
+          var pseudo = prompt("Choose a pseudo please",'Guest_'+C4Fct.getRandomIntInclusive(1,999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
           if ( pseudo.trim().length > 0 ){
             that.state.game.pseudo = pseudo; 
@@ -507,7 +519,7 @@ var Connect4 = React.createClass({
                 console.log("pseudo valid:",pseudo);         
                 that.updatePseudo(pseudo);
                 //that.updatePlayers(players);
-                that.state.game.players = players;
+                //that.state.game.players = players;
                 that.forceUpdate();
                 console.log("****");   
 
@@ -527,10 +539,14 @@ var Connect4 = React.createClass({
 
         //that.state.game.connected = false;
         socket.emit('leaveGame');
-     
+        that.state.game.me = {};
+        that.state.game.opponent = {};
+         that.forceUpdate();      
         //Rem: setState works asynchronously so we need to use a callback:
-        this.setState({ game : new C4Fct.game(this.state.game.level) }, function(){
+        that.setState({ game : new C4Fct.game(that.state.game.level) }, function(){
           console.log("turn:",that.state.game.turn);
+          //that.state.game.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
+
           if ( that.state.game.turn === 1 ){//faire jouer la machine    
             C4Fct.computerMove(that);
           }else{
@@ -542,7 +558,141 @@ var Connect4 = React.createClass({
     }
   },
 
+  handleUserClick: function(col) {
+    console.log('handleUserClick');
 
+    //turn = 1 means it's computers turn to play, code = 2 means user can play, turn = null means we are out of the game    
+    if ( this.state.game.opponentType === "robot"){
+      console.log('handleUserClick robot');
+      switch(this.state.game.turn){
+          case 1:
+            alert("It's not your turn...");
+            break;
+          case 2://if user is allowed to play 
+            //the user plays
+            var lastMove = C4Fct.addDisc(this.state.game, col);
+            if ( !lastMove ){ 
+              alert("This column is full!");
+              return;
+            }; 
+            //console.log('lastMove=',lastMove); //console.log('game=',game); 
+            this.state.game.nbMove++;
+            this.forceUpdate();
+
+            //it is a winning move ?
+            var win = C4Fct.testWin(this.state.game, lastMove);
+            if ( win ){
+              this.state.game.winner = 2;
+              this.state.game.turn = null;
+              this.forceUpdate();     
+              //this.setState({ game : game });
+              alert("You win!");
+            }else{//IA'S turn to play
+
+              //if no winner and grid full then draw game 
+              if ( this.state.game.nbMove == 42 ){
+                this.state.game.turn = null;
+                alert("draw 0-0 !");
+                this.forceUpdate();  
+              }else{
+                this.state.game.turn = 1;
+                //get actual connect 4 game position in string notation       
+                var pos = C4Fct.arrayToString(this.state.game.position);
+                //console.log("pos=",pos);
+
+                //get the solution from Pascal Pons "alpha beta pruning" algorithm 
+                C4Fct.computerMove(this);
+              }
+            }            
+            break;
+
+          case null:
+            //var rep = confirm("Play again ?");
+            //if (rep){
+              var self = this;
+              //Rem: setState works asynchronously so we need to use a callback to launch the game:
+              this.setState({ game : new C4Fct.game(this.state.game.level) }, function(){
+                console.log("turn:",self.state.game.turn);
+                if ( self.state.game.turn === 1 ){//faire jouer la machine    
+                  C4Fct.computerMove(self);
+                }else{
+                  //no code here because this.handleUserClick() will be called on the click event
+                }
+              });
+            //}
+            break;
+          default:
+            alert("an error");
+      }
+    }else if(this.state.game.opponentType === "human"){
+
+      console.log('handleUserClick human');
+      if ( this.state.game.turn ){ 
+        if ( this.state.game.turn != this.state.game.me.turnId ){
+          alert("It's not your turn...");
+        }else{//user is allowed to play 
+          //alert("jouer");
+          //the user plays
+          var lastMove = C4Fct.addDisc(this.state.game, col);
+          if ( !lastMove ){ 
+            alert("This column is full!");
+            return;
+          }; 
+          //console.log('lastMove=',lastMove); //console.log('game=',game); 
+          socket.emit('addDisc',col);//tell server to tell my opponent that i add a disc on column col
+          this.state.game.nbMove++;
+          this.forceUpdate();
+
+          //it is a winning move ?
+          var win = C4Fct.testWin(this.state.game, lastMove);
+          if ( win ){
+            this.state.game.winner = this.state.game.me.turnId;
+            this.state.game.turn = null;     
+            //this.setState({ game : game });
+            this.forceUpdate(function(){
+              alert("You win!"); 
+              //reinit the game
+              this.state.game = new C4Fct.game();
+              this.forceUpdate();   
+            });                         
+          }else{
+            //if no winner and grid full then draw game 
+            if ( this.state.game.nbMove == 42 ){
+              this.state.game.turn = null;
+              this.forceUpdate(function(){
+                alert("draw 0-0 !");
+                //reinit the game
+                this.state.game = new C4Fct.game();
+                this.forceUpdate();                
+              });                 
+            }else{//opponent's turn
+              this.state.game.turn = 3-this.state.game.me.turnId;
+
+              //socket.emit('addDisc',col);//tell server to tell opponent that i have added a disc on column col
+
+              //get actual connect 4 game position in string notation       
+              //var pos = C4Fct.arrayToString(this.state.game.position);
+              //console.log("pos=",pos);
+
+              //get the solution from Pascal Pons "alpha beta pruning" algorithm 
+              //C4Fct.computerMove(this);
+              this.forceUpdate();  
+            }
+            
+          }
+
+        }
+      }else{
+        //reinit the game
+        this.state.game = new C4Fct.game();
+        this.state.game.turn = null;
+        this.forceUpdate(); 
+      }
+
+    } 
+
+
+  },
 
   render: function() {
     //{ this.state.loading ? <Loader/> : null }
@@ -570,7 +720,8 @@ var Debug = React.createClass({
       <div>
         <div>opponentType: {this.props.game.opponentType}</div>
         <div>Me: {this.props.game.pseudo}</div>
-        <div>My opponent: {this.props.game.opponent}</div>    
+        <div>My opponent: {this.props.game.opponent.pseudo}</div>    
+        <div>turn: {this.props.game.turn}</div>    
       </div>
     );
   }
@@ -664,3 +815,29 @@ ReactDOM.render(
 // });
 
 // <UserGist source="https://api.github.com/users/octocat/gists" />
+
+
+  // getInitialState: function() {
+  //   return {
+  //     windowWidth: window.innerWidth
+  //   };
+  // },
+
+  // handleResize: function(e) {
+  //   this.setState({windowWidth: window.innerWidth});
+  //   console.log("windowWidth=",this.state.windowWidth);
+  //   console.log("maskHeight=",document.getElementById('mask').Width);
+  // },
+
+  //componentDidMount: function() {
+    //window.addEventListener('resize', this.handleResize);
+  //},
+
+  //componentWillUnmount: function() {
+    //window.removeEventListener('resize', this.handleResize);
+  //},
+
+  // render: function() {
+  //   var style = {visibility:'hidden'};
+  //   return <div style={style}>Current window width: {this.state.windowWidth}</div>;
+  // }
