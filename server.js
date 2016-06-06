@@ -24,7 +24,8 @@ var ios = require('socket.io-express-session');
 var io = require('socket.io')(server);
 //io.use(ios(session)); // session support
 db = require('./db');//module à part pour gerer les acces bdd
-var url_mongo = 'mongodb://localhost:27017/connect4';//27017 est le port par defaut pour mongodb si on ne le precise pas. On peut passer plusieurs hotes pour acceder à des bases sur plusieures serveurs
+
+//var url_mongo = 'mongodb://localhost:27017/connect4';//27017 est le port par defaut pour mongodb si on ne le precise pas. On peut passer plusieurs hotes pour acceder à des bases sur plusieures serveurs
 
 var players = {};//players list
 var games = {};//liste of the current games
@@ -53,12 +54,12 @@ app.get('/api/getplayers', function(req, res) {
   res.json(players);
 });
 
-db.connect(url_mongo, function(err){
-  if (err) {
-    console.log('Cannot connect to mongodb database Connect4 !');
-    process.exit(1);
-  }
-});
+// db.connect(url_mongo, function(err){
+//   if (err) {
+//     console.log('Cannot connect to mongodb database Connect4 !');
+//     process.exit(1);
+//   }
+// });
 
 // Socket.IO part used for multiplayer game
 
