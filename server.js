@@ -47,22 +47,23 @@ var getIdFromPseudo = function(pseudo, players){
   return null;
 };
 
-//pseudo ask players list to the server
+//ask players list to the server (use by the client to check if a pseudo is free)
 app.get('/api/getplayers', function(req, res) {
   console.log("/api/getplayers");
   res.json(players);
 });
 
-
 db.connect(url_mongo, function(err){
   if (err) {
-    console.log('Cannot connect to mongo database Connect4 !');
+    console.log('Cannot connect to mongodb database Connect4 !');
     process.exit(1);
   }
 });
 
 // Socket.IO part used for multiplayer game
 
+
+//try to find 2 users ready for a game, if these players are found we start a new game 
 var try2LaunchGame = function(){
   console.log('try2LaunchGame'); 
   for ( var prop1 in players) {
@@ -84,7 +85,8 @@ var try2LaunchGame = function(){
           
 
           //games[player1.sid+player2.sid] = 
-          //we tell the 2 players that the game start
+
+          //we tell the 2 players (only them) that the game is starting 
           var socket;
           
           socket = clients[player1.sid];
@@ -103,6 +105,9 @@ var try2LaunchGame = function(){
   }   
 }
 
+
+//If a user as an opponenet we delete this link on players object 
+//and tell that this opponent is available for a new game
 var removeOpponentsLink = function(sid){
   if ( typeof players[sid] != "undefined" ){
     //if socket.id was playing we declare his opponent available so that he could be pick up by the server to play again
@@ -117,6 +122,7 @@ var removeOpponentsLink = function(sid){
   }  
 };
 
+//Called when a user is deconnected from the server (can be page closed or page refresh: the sockets link is lost) 
 var deletePlayer = function(sid){
   removeOpponentsLink(sid);
   if ( typeof players[sid] != "undefined" ){
@@ -127,6 +133,7 @@ var deletePlayer = function(sid){
   }
 };
 
+//Called when a user come back to 'AI game mode' (the sockets link with the server is not destroyed) 
 var inactivatePlayer = function(sid){
   removeOpponentsLink(sid);
   if ( typeof players[sid] != "undefined" ){
@@ -135,8 +142,7 @@ var inactivatePlayer = function(sid){
   }  
 };
 
-
-var clients = {};//we will store the socket object in this array for each client
+var clients = {};//in this array  we will store the socket objects of clients
 
 io.on('connection', function (socket){
   console.log('New client connected!');
@@ -165,6 +171,11 @@ io.on('connection', function (socket){
   
   socket.on('disconnect', function(){ 
     console.log('disconnect');
+    var osid = players[socket.id].opponent_sid;
+    //prevenir players[socket.id].opponent_sid que socket.id quitte la partie
+    if ( osid ){
+      clients[osid].emit('opponentResign');
+    }
     deletePlayer(socket.id);
 
     //prevenir adversaire !!!!!

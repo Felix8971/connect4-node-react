@@ -127,6 +127,7 @@ var Mask = React.createClass({
           turn={this.props.game.turn} 
           level={this.props.game.level} 
           winner={this.props.game.winner}
+          opponentType = {this.props.game.opponentType}
           classNames={this.props.game.classNames} />      
       </div>
     );    
@@ -163,10 +164,10 @@ var NextTurnDisplay = React.createClass({
     var turn = this.props.turn;
     return (
       <div>
-        <div id="next-turn">Next turn: 
+        <div id="next-turn" >Next turn: 
           <div className={classNames[turn]}></div>
         </div>
-        <div id="difficulty">Difficulty: {this.props.level}</div>
+        { this.props.opponentType === 'robot' ? <div id="difficulty">Difficulty: {this.props.level}</div> : null}
         <div id="winner">Winner: 
           <div className={classNames[this.props.winner]}></div>
         </div>
@@ -181,6 +182,7 @@ var Grid = React.createClass({
     var col=-1;
     var classNames = this.props.game.classNames;
     var aligned = this.props.game.aligned;
+    var lastMove = this.props.game.lastMove;
 
     var columns = this.props.game.grid.map(function(column) {      
       col++;
@@ -188,7 +190,7 @@ var Grid = React.createClass({
       //console.log('col=',col);console.log('column=',column);
       return (
         <div className="column" key={col} id={id}>
-          <ColumnGrid column={column} classNames={classNames} col={col} aligned={aligned} />
+          <ColumnGrid column={column} classNames={classNames} col={col} aligned={aligned} lastMove={lastMove}/>
         </div>
       );
     });
@@ -209,15 +211,24 @@ var ColumnGrid = React.createClass({
     var classNames = this.props.classNames;
     var aligned = this.props.aligned;
 
+    var lastCol = this.props.lastMove.col;
+    var lastLine = this.props.lastMove.line;
+    var blink =  this.props.lastMove.blink;
+
     var squares = this.props.column.map(function(square) {
       line++
       var id = col.toString()+"-"+line.toString();
       var idSquare = "square-"+id;
       var idDisc = "disc-"+id;
+      var style = 'square';
+
+      if ( lastCol === col && lastLine ===  line && blink ){ 
+        style += ' clignoter';
+      }
 
       return (
-        <div className="square" key={idDisc} id={idSquare} >
-          <div  id={idDisc} className={classNames[square]}></div>
+        <div className={style} key={idDisc} id={idSquare} >
+          <div  id={idDisc} className={classNames[square]}  ></div>
           { aligned[col][line] ? <img className="cross" src="images/forbidden-mark.svg"/> : null }
         </div>
       );
@@ -340,7 +351,7 @@ var SettingZone = React.createClass({
               <br/>
 
               <div className="players-list" >
-                { playerRows.length > 0 ? playerRows : <div id="nobody">Nobody here...</div>}
+                { playerRows.length > 0 ? playerRows : <div id="nobody">Waiting for opponent...</div>}
               </div>
             </div>
           );          
@@ -433,17 +444,30 @@ var Connect4 = React.createClass({
     });
 
     socket.on('opponentResign', function (){
-      alert('opponentResign');
+      //alert('opponentResign');
       self.state.game.me = {};
       self.state.game.opponent = {};
-      self.forceUpdate();       
+      self.forceUpdate();  
+
+      self.state.game.winner = self.state.game.me.turnId;
+      self.state.game.turn = null;
+      self.forceUpdate(function(){
+        alert("You opponent resigns. You win the game!");  
+        //reinit the game
+        self.state.game = new C4Fct.game();
+        self.state.game.turn = null;
+        self.forceUpdate();               
+      });
     });
 
 
+    //opponent add a disc on col
     socket.on('addDisc', function (col){
       //alert('my opponent add a disc on col '+col);
 
       var lastMove = C4Fct.addDisc(self.state.game, col);
+      self.state.game.lastMove = lastMove;
+      self.state.game.lastMove.blink = true;
       //console.log('lastMove=',lastMove); //console.log('game=',game); 
       self.state.game.nbMove++;
       self.forceUpdate();
@@ -457,7 +481,7 @@ var Connect4 = React.createClass({
           alert("You loose!");
           //reinit the game
           self.state.game = new C4Fct.game();
-          this.state.game.turn = null;
+          self.state.game.turn = null;
           self.forceUpdate(); 
         });   
       }else if( self.state.game.nbMove == 42 ){//if no winner and grid full then draw game 
@@ -571,6 +595,9 @@ var Connect4 = React.createClass({
           case 2://if user is allowed to play 
             //the user plays
             var lastMove = C4Fct.addDisc(this.state.game, col);
+            this.state.game.lastMove = lastMove;
+            this.state.game.lastMove.blink = false;
+
             if ( !lastMove ){ 
               alert("This column is full!");
               return;
@@ -638,6 +665,9 @@ var Connect4 = React.createClass({
             alert("This column is full!");
             return;
           }; 
+          this.state.game.lastMove = lastMove;
+          this.state.game.lastMove.blink = false;
+
           //console.log('lastMove=',lastMove); //console.log('game=',game); 
           socket.emit('addDisc',col);//tell server to tell my opponent that i add a disc on column col
           this.state.game.nbMove++;

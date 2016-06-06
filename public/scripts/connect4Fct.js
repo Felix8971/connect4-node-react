@@ -26,7 +26,6 @@ var C4Fct = {
   isPseudoUsed: function (pseudo, players){
     console.log('isPseudoUsed');
     for ( var prop in players) {
-      console.log("x=",players[prop].pseudo);
       if( players[prop].pseudo === pseudo){
         return true;
       }
@@ -46,7 +45,7 @@ var C4Fct = {
         //this.myTurnId = null,//user turn id, can be 1 or 2 (or null before and after the game) 
         this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
         //we define it client side only in the case of a game against computer 
-
+        this.lastMove = {};
         this.opponentType = "robot"; //can be "robot" ou "human"
         this.level = level || "normal";
         this.nbMove = 0;
@@ -186,6 +185,8 @@ var C4Fct = {
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
      
       var lastMove = C4Fct.addDisc(game, columnPlayed);
+      _this.state.game.lastMove = lastMove;
+      _this.state.game.lastMove.blink = true;
       game.nbMove++;
       
       //we update the game state
@@ -227,7 +228,7 @@ var C4Fct = {
         canAddDisc = true;
         game.grid[col][line] = game.turn;
         game.position.push(col+1);//+1 because first column start by 1 in string notation, not 0.            
-        return {col:col,line:line, turn:game.turn};
+        return {col:col,line:line, turn:game.turn, blink:false};
       }
     }
     if ( !canAddDisc ){ 

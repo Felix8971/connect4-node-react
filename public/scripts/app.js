@@ -4015,7 +4015,6 @@ var C4Fct = {
   isPseudoUsed: function (pseudo, players) {
     console.log('isPseudoUsed');
     for (var prop in players) {
-      console.log("x=", players[prop].pseudo);
       if (players[prop].pseudo === pseudo) {
         return true;
       }
@@ -4035,7 +4034,7 @@ var C4Fct = {
     //this.myTurnId = null,//user turn id, can be 1 or 2 (or null before and after the game)
     this.turn = 1 + Math.floor(2 * Math.random()); // 1 or 2 randomely (tells us who is going to play by is code)
     //we define it client side only in the case of a game against computer
-
+    this.lastMove = {};
     this.opponentType = "robot"; //can be "robot" ou "human"
     this.level = level || "normal";
     this.nbMove = 0;
@@ -4161,6 +4160,8 @@ var C4Fct = {
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
 
       var lastMove = C4Fct.addDisc(game, columnPlayed);
+      _this.state.game.lastMove = lastMove;
+      _this.state.game.lastMove.blink = true;
       game.nbMove++;
 
       //we update the game state
@@ -4201,7 +4202,7 @@ var C4Fct = {
         canAddDisc = true;
         game.grid[col][line] = game.turn;
         game.position.push(col + 1); //+1 because first column start by 1 in string notation, not 0.           
-        return { col: col, line: line, turn: game.turn };
+        return { col: col, line: line, turn: game.turn, blink: false };
       }
     }
     if (!canAddDisc) {
@@ -4535,7 +4536,7 @@ var ChooseMode = React.createClass({
   displayName: 'ChooseMode',
 
   handleChange: function (event) {
-    console.log('id:', event.currentTarget.id);
+    //console.log('id:',event.currentTarget.id);
     this.props.onClickOpponentType(event.currentTarget.id);
   },
   render: function () {
@@ -4641,6 +4642,7 @@ var Mask = React.createClass({
         turn: this.props.game.turn,
         level: this.props.game.level,
         winner: this.props.game.winner,
+        opponentType: this.props.game.opponentType,
         classNames: this.props.game.classNames })
     );
   }
@@ -4687,12 +4689,12 @@ var NextTurnDisplay = React.createClass({
         'Next turn:',
         React.createElement('div', { className: classNames[turn] })
       ),
-      React.createElement(
+      this.props.opponentType === 'robot' ? React.createElement(
         'div',
         { id: 'difficulty' },
         'Difficulty: ',
         this.props.level
-      ),
+      ) : null,
       React.createElement(
         'div',
         { id: 'winner' },
@@ -4710,6 +4712,7 @@ var Grid = React.createClass({
     var col = -1;
     var classNames = this.props.game.classNames;
     var aligned = this.props.game.aligned;
+    var lastMove = this.props.game.lastMove;
 
     var columns = this.props.game.grid.map(function (column) {
       col++;
@@ -4718,7 +4721,7 @@ var Grid = React.createClass({
       return React.createElement(
         'div',
         { className: 'column', key: col, id: id },
-        React.createElement(ColumnGrid, { column: column, classNames: classNames, col: col, aligned: aligned })
+        React.createElement(ColumnGrid, { column: column, classNames: classNames, col: col, aligned: aligned, lastMove: lastMove })
       );
     });
 
@@ -4740,15 +4743,24 @@ var ColumnGrid = React.createClass({
     var classNames = this.props.classNames;
     var aligned = this.props.aligned;
 
+    var lastCol = this.props.lastMove.col;
+    var lastLine = this.props.lastMove.line;
+    var blink = this.props.lastMove.blink;
+
     var squares = this.props.column.map(function (square) {
       line++;
       var id = col.toString() + "-" + line.toString();
       var idSquare = "square-" + id;
       var idDisc = "disc-" + id;
+      var style = 'square';
+
+      if (lastCol === col && lastLine === line && blink) {
+        style += ' clignoter';
+      }
 
       return React.createElement(
         'div',
-        { className: 'square', key: idDisc, id: idSquare },
+        { className: style, key: idDisc, id: idSquare },
         React.createElement('div', { id: idDisc, className: classNames[square] }),
         aligned[col][line] ? React.createElement('img', { className: 'cross', src: 'images/forbidden-mark.svg' }) : null
       );
@@ -4779,7 +4791,7 @@ var SettingZone = React.createClass({
 
 
   handleClick: function (event) {
-    console.log(event.currentTarget.id);
+    //console.log(event.currentTarget.id);
     this.props.onClickDifficulty(event.currentTarget.id);
   },
 
@@ -4903,7 +4915,7 @@ var SettingZone = React.createClass({
             playerRows.length > 0 ? playerRows : React.createElement(
               'div',
               { id: 'nobody' },
-              'Nobody here...'
+              'Waiting for opponent...'
             )
           )
         );
@@ -4964,9 +4976,9 @@ var Connect4 = React.createClass({
     // });
 
     socket.on('startGame', function (player1, player2) {
-      console.log('--- startGame signal ! --- ');
-      console.log("Me:", player1);
-      console.log("my opponent:", player2);
+      //console.log('--- startGame signal ! --- ');
+      //console.log("Me:",player1);
+      //console.log("my opponent:",player2);
 
       self.state.game.turn = 1; //because 1 always start
       self.state.game.me = player1;
@@ -4984,16 +4996,29 @@ var Connect4 = React.createClass({
     });
 
     socket.on('opponentResign', function () {
-      alert('opponentResign');
+      //alert('opponentResign');
       self.state.game.me = {};
       self.state.game.opponent = {};
       self.forceUpdate();
+
+      self.state.game.winner = self.state.game.me.turnId;
+      self.state.game.turn = null;
+      self.forceUpdate(function () {
+        alert("You opponent resigns. You win the game!");
+        //reinit the game
+        self.state.game = new C4Fct.game();
+        self.state.game.turn = null;
+        self.forceUpdate();
+      });
     });
 
+    //opponent add a disc on col
     socket.on('addDisc', function (col) {
       //alert('my opponent add a disc on col '+col);
 
       var lastMove = C4Fct.addDisc(self.state.game, col);
+      self.state.game.lastMove = lastMove;
+      self.state.game.lastMove.blink = true;
       //console.log('lastMove=',lastMove); //console.log('game=',game);
       self.state.game.nbMove++;
       self.forceUpdate();
@@ -5007,7 +5032,7 @@ var Connect4 = React.createClass({
           alert("You loose!");
           //reinit the game
           self.state.game = new C4Fct.game();
-          this.state.game.turn = null;
+          self.state.game.turn = null;
           self.forceUpdate();
         });
       } else if (self.state.game.nbMove == 42) {
@@ -5043,7 +5068,7 @@ var Connect4 = React.createClass({
 
   //Choose between robot or human opponent type
   handleChangeOpponentType: function (value) {
-    console.log("handleChangeOpponentType:", value);
+    //console.log("handleChangeOpponentType:",value);
 
     var that = this;
 
@@ -5063,15 +5088,15 @@ var Connect4 = React.createClass({
           if (pseudo.trim().length > 0) {
             that.state.game.pseudo = pseudo;
             C4Fct.getPlayers(function (players) {
-              console.log('players===>', players);
+              //console.log('players===>',players);
               if (!C4Fct.isPseudoUsed(pseudo, players)) {
 
-                console.log("pseudo valid:", pseudo);
+                //console.log("pseudo valid:",pseudo);        
                 that.updatePseudo(pseudo);
                 //that.updatePlayers(players);
                 //that.state.game.players = players;
                 that.forceUpdate();
-                console.log("****");
+                //console.log("****");  
 
                 //ne fonctinnera pas si le user est deconnécté de la socket
                 socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
@@ -5092,7 +5117,7 @@ var Connect4 = React.createClass({
         that.forceUpdate();
         //Rem: setState works asynchronously so we need to use a callback:
         that.setState({ game: new C4Fct.game(that.state.game.level) }, function () {
-          console.log("turn:", that.state.game.turn);
+          //console.log("turn:",that.state.game.turn);
           //that.state.game.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
 
           if (that.state.game.turn === 1) {
@@ -5107,11 +5132,11 @@ var Connect4 = React.createClass({
   },
 
   handleUserClick: function (col) {
-    console.log('handleUserClick');
+    //console.log('handleUserClick');
 
     //turn = 1 means it's computers turn to play, code = 2 means user can play, turn = null means we are out of the game   
     if (this.state.game.opponentType === "robot") {
-      console.log('handleUserClick robot');
+      //console.log('handleUserClick robot');
       switch (this.state.game.turn) {
         case 1:
           alert("It's not your turn...");
@@ -5120,6 +5145,9 @@ var Connect4 = React.createClass({
           //if user is allowed to play
           //the user plays
           var lastMove = C4Fct.addDisc(this.state.game, col);
+          this.state.game.lastMove = lastMove;
+          this.state.game.lastMove.blink = false;
+
           if (!lastMove) {
             alert("This column is full!");
             return;
@@ -5162,7 +5190,7 @@ var Connect4 = React.createClass({
           var self = this;
           //Rem: setState works asynchronously so we need to use a callback to launch the game:
           this.setState({ game: new C4Fct.game(this.state.game.level) }, function () {
-            console.log("turn:", self.state.game.turn);
+            //console.log("turn:",self.state.game.turn);
             if (self.state.game.turn === 1) {
               //faire jouer la machine   
               C4Fct.computerMove(self);
@@ -5177,7 +5205,7 @@ var Connect4 = React.createClass({
       }
     } else if (this.state.game.opponentType === "human") {
 
-      console.log('handleUserClick human');
+      //console.log('handleUserClick human');
       if (this.state.game.turn) {
         if (this.state.game.turn != this.state.game.me.turnId) {
           alert("It's not your turn...");
@@ -5190,6 +5218,9 @@ var Connect4 = React.createClass({
             alert("This column is full!");
             return;
           };
+          this.state.game.lastMove = lastMove;
+          this.state.game.lastMove.blink = false;
+
           //console.log('lastMove=',lastMove); //console.log('game=',game);
           socket.emit('addDisc', col); //tell server to tell my opponent that i add a disc on column col
           this.state.game.nbMove++;
