@@ -52,7 +52,7 @@ var getIdFromPseudo = function(pseudo, players){
 
 //ask players list to the server (use by the client to check if a pseudo is free)
 app.get('/connect4/getplayers', function(req, res) {
-  console.log("/connect4/getplayers");
+  //console.log("/connect4/getplayers");
   res.json(players);
 });
 
@@ -165,12 +165,12 @@ io.on('connection', function (socket){
   socket.emit('players',players);
 
   socket.on('getPlayers', function(){ 
-    console.log('players');
+    //console.log('players');
     socket.emit('players',players);//envoie juste au client connecté
   });
 
   socket.on('addPlayer', function (pseudo) {
-    console.log('addPlayer '+pseudo);
+    //console.log('addPlayer '+pseudo);
     players[socket.id].pseudo = pseudo;
     players[socket.id].dispo = true;
     //console.log('players list=',players);
@@ -180,7 +180,7 @@ io.on('connection', function (socket){
   });
   
   socket.on('disconnect', function(){ 
-    console.log('disconnect');
+    //console.log('disconnect');
     var osid = players[socket.id].opponent_sid;
     //prevenir players[socket.id].opponent_sid que socket.id quitte la partie
     if ( osid ){
@@ -194,7 +194,7 @@ io.on('connection', function (socket){
 
   //if a user leave the game we remove him from users list and we inform other clients
   socket.on('leaveGame', function(){
-    console.log('leaveGame');
+    //console.log('leaveGame');
     var osid = players[socket.id].opponent_sid;
     //prevenir players[socket.id].opponent_sid que socket.id quitte la partie
     if ( osid ){
@@ -207,7 +207,7 @@ io.on('connection', function (socket){
 
   //if a user leave the game we remove him from users list and we inform other clients
   socket.on('gameEnd', function(){
-    console.log('gameEnd');
+    //console.log('gameEnd');
     inactivatePlayer(socket.id);
   });  
 
