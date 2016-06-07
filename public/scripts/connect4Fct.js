@@ -25,7 +25,6 @@ var C4Fct = {
     return array[index];
   },
 
-
   isPseudoUsed: function (pseudo, players){
     for ( var prop in players) {
       if( players[prop].pseudo === pseudo){
@@ -42,44 +41,40 @@ var C4Fct = {
     }
   },
 
+  emptyGrid : function(){
+    //can contain 3 differents value: 
+    // 0 : for empty
+    // 1 : for red disc
+    // 2 : for blue disk
+    return [//game map
+      [0, 0, 0, 0, 0, 0],//first column (grid's top first)
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+    ];    
+  },
+
   game: function(level){
-        this.pseudo = null;
-        //this.myTurnId = null,//user turn id, can be 1 or 2 (or null before and after the game) 
-        this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
-        //we define it client side only in the case of a game against computer 
-        this.lastMove = {};
-        this.opponentType = "robot"; //can be "robot" ou "human"
-        this.level = level || "normal";
-        this.nbMove = 0;
-        this.winner = 0;
-        this.players = {};      
-        this.classNames = ["noDisc","redDisc","blueDisc"];
-        this.urlSolver = "http://connect4.gamesolver.org/solve?";
-
-        //this.urlConnect4MP = "http://connect4.gamesolver.org/solve?";
-        
-        this.me = {};
-        this.opponent = {};
-
-        this.position = [];//list of column's numbers successively played, first column is 1
-        this.grid = [//game map
-          [0, 0, 0, 0, 0, 0],//first column (grid's top first)
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-        ];
-        this.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-        ];
+    this.pseudo = null;
+    this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
+    //we define turn client side only in the case of a game against computer 
+    this.lastMove = {};
+    this.opponentType = "robot"; //can be "robot" ou "human"
+    this.level = level || "normal";
+    this.nbMove = 0;
+    this.winner = 0;
+    this.players = {};      
+    this.classNames = ["noDisc","redDisc","blueDisc"];
+    this.urlSolver = "http://connect4.gamesolver.org/solve?";
+    //this.urlConnect4MP = "http://connect4.gamesolver.org/solve?";
+    this.me = {};
+    this.opponent = {};
+    this.position = [];//list of column's numbers successively played, first column is 1
+    this.grid = C4Fct.emptyGrid();//game matrix map
+    this.aligned = C4Fct.emptyGrid();//tells where to display the check symbol when 4 discs or more are aligned
   },
 
   /**
@@ -103,7 +98,6 @@ var C4Fct = {
         }
       }
     }
-
     //console.log('stat:',stat);
     var statSorted =_.sortBy(stat, 'value').reverse();
     //console.log('statSorted:',statSorted);
@@ -131,10 +125,6 @@ var C4Fct = {
     "very hard":"hal.png",
   },
 
-  /**
-    * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
-    * and make the computer play 
-  **/
 
   // computerMove: function(_this){
   //   var game = _this.state.game;
@@ -154,13 +144,15 @@ var C4Fct = {
 
   // },
 
+  /**
+    * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
+    * and make the computer play 
+  **/
 
   computerMove: function(_this){
     var game = _this.state.game;
     var pos = C4Fct.arrayToString(game.position);
-    //var pos ="32";
-    //console.log('pos=',pos);
-   
+    //var pos ="32";//console.log('pos=',pos);
     var options = {  
       method: 'GET'
     };
@@ -177,11 +169,8 @@ var C4Fct = {
     
       var stat = C4Fct.getArrayStat(array);
       var n = stat.length;
-      //alert(n);
-      //console.log('stat:',stat);
+      //console.log('n:'+ n+ ' stat:',stat);
       var columnPlayed;
-
-      //console.log("easy and nb choice " + n + ": "+C4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
       var rank = C4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
 
@@ -223,7 +212,7 @@ var C4Fct = {
 
 
   /**
-   * Try to add a disc on the game's grid  
+   * Try to add a disc on the game's grid,  
    * if it's possible we update the game object
   **/  
   addDisc: function(game, col){
@@ -259,18 +248,29 @@ var C4Fct = {
 
   //Check if the last move win (four pieces connected)
   testWin: function(game, lastMove){//if optionCheck is true we record the aligned discs in game.aligned matrix
+
+    var count = function(nbAlignedDisc, game){
+      //count both direction
+      if ( nbAlignedDisc >= 4 ){//yes it can be > 4 !
+        return true;
+      }else{
+        game.aligned = C4Fct.emptyGrid();
+        return false;
+      }
+    }
     
-    var test_alignment_EW = function(game, lastMove, optionCheck){
+    //use to verify if we have 4 chips horizontally aligned
+    //if we pass optionCheck === true the 'aligned' grid will be update 
+    var test_alignment_EW = function(game, lastMove){
       var nbAlignedDisc = 1;
-      //horizontal right direction
+      game.aligned[lastMove.col][lastMove.line] = true;
+      //Horizontal right direction 
       //C4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
       for(var k=1;k<=3;k++){
         if ( lastMove.col+k < 7 ){
           if ( game.grid[lastMove.col+k][lastMove.line+0] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col+k][lastMove.line+0] = true;
-            }
+            game.aligned[lastMove.col+k][lastMove.line+0] = true;
           }else{
             break;
           }
@@ -279,76 +279,50 @@ var C4Fct = {
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
       //C4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
       
-      //horizontal left direction
+      //Horizontal left direction
       for(var k=1;k<=3;k++){
         if ( lastMove.col-k >= 0 ){
           if ( game.grid[lastMove.col-k][lastMove.line+0] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col-k][lastMove.line+0] = true;
-            }            
+            game.aligned[lastMove.col-k][lastMove.line+0] = true;           
           }else{
             break;
           }
         }
       }
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
-      //count both direction
-      if ( nbAlignedDisc >= 4 ){//yes it can be > 4 !
-        return true;
-      }
+      //count in both direction
+      return count(nbAlignedDisc, game);
     }
 
-
-    if ( test_alignment_EW(game, lastMove, false) ){
-      //Now we know we have an alignment we can recall the function again to display it 
-      test_alignment_EW(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true; 
-      return true;
-    }
-
-    var test_alignment_NS = function(game, lastMove, optionCheck){
+    var test_alignment_NS = function(game, lastMove){
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true; 
       //vertical down
       for(var k=1;k<=3;k++){
         if ( lastMove.line + k < 6 ){
           if ( game.grid[lastMove.col+0][lastMove.line + k] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col+0][lastMove.line + k] = true;
-            }             
+            game.aligned[lastMove.col+0][lastMove.line + k] = true;            
           }else{
             break;
           }
         }
       }        
-      //vertical up doesn't need to be checked (it will always be empty due to gravity effect)
-      
+      //vertical up doesn't need to be checked (it will always be empty due to gravity effect...)
       //count 
-      if ( nbAlignedDisc >= 4 ){
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     }
 
-    if ( test_alignment_NS(game, lastMove, false) ){
-      //Now we know we have an alignment we can recall the function again to display it 
-      test_alignment_NS(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true; 
-      return true;
-    }
-
-
-
-    var test_alignment_NW = function(game, lastMove, optionCheck){
+    var test_alignment_NW = function(game, lastMove){
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true; 
       //toward North/west 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col - k >= 0) && (lastMove.line - k >= 0) ){
           if ( game.grid[lastMove.col-k][lastMove.line - k] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col - k][lastMove.line- k] = true;
-            }             
+            game.aligned[lastMove.col - k][lastMove.line- k] = true;       
           }else{
             break;
           }
@@ -360,39 +334,25 @@ var C4Fct = {
         if ( (lastMove.col + k < 7 ) && (lastMove.line + k < 6 ) ){
           if ( game.grid[lastMove.col + k][lastMove.line + k] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col + k][lastMove.line + k] = true;
-            }              
+            game.aligned[lastMove.col + k][lastMove.line + k] = true;     
           }else{
             break;
           }
         }
       } 
-
       //count 
-      if ( nbAlignedDisc >= 4 ){
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     }
 
-    if ( test_alignment_NW(game, lastMove, false) ){
-      //Now we know we have an alignment we can recall the function again to display it 
-      test_alignment_NW(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true; 
-      return true;
-    }
-
-
-    var test_alignment_NE = function(game, lastMove, optionCheck){    
+    var test_alignment_NE = function(game, lastMove){    
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true; 
       //toward North/Est 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col + k < 7 ) && (lastMove.line - k >= 0 ) ){
           if ( game.grid[lastMove.col + k][lastMove.line - k] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col + k][lastMove.line - k] = true;
-            }             
+            game.aligned[lastMove.col + k][lastMove.line - k] = true;            
           }else{
             break;
           }
@@ -404,26 +364,27 @@ var C4Fct = {
         if ( (lastMove.col - k >= 0 ) && (lastMove.line + k < 6 ) ){
           if ( game.grid[lastMove.col - k][lastMove.line + k] === lastMove.turn){
             nbAlignedDisc++;
-            if ( optionCheck ){
-              game.aligned[lastMove.col - k][lastMove.line + k] = true;
-            }             
+            game.aligned[lastMove.col - k][lastMove.line + k] = true;     
           }else{
             break;
           }
         }
       }   
-
       //count 
-      if ( nbAlignedDisc >= 4 ){
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     }
-    if ( test_alignment_NE(game, lastMove, false) ){
-      //Now we know we have an alignment we can recall the function again to display it 
-      test_alignment_NE(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true; 
+
+    //we use the functions
+    if ( test_alignment_EW(game, lastMove) ){
+      return true;
+    } else if ( test_alignment_NS(game, lastMove) ){
+      return true;
+    } else if ( test_alignment_NW(game, lastMove) ){
+      return true;
+    } else if ( test_alignment_NE(game, lastMove) ){
       return true;
     }
+
   },
 
 

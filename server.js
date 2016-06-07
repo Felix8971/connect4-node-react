@@ -40,15 +40,7 @@ var urlConnect4MP = "http://localhost:8080"; //"http://www.felixdebon.fr"; //dev
 
 //players["s6546r5f4"] = { pseudo:"toto", sid:"s6546r5f4", dispo:true, opponent_sid:null, img:'human.png' };
 
-var getIdFromPseudo = function(pseudo, players){
-  for ( var prop in players) {
-    //console.log("x=",players[prop].pseudo);
-    if( players[prop].pseudo === pseudo){
-      return players[prop].sid;//return prop would also work
-    }
-  }
-  return null;
-};
+
 
 //ask players list to the server (use by the client to check if a pseudo is free)
 app.get('/connect4/getplayers', function(req, res) {
@@ -86,21 +78,15 @@ var try2LaunchGame = function(){
           players[player1.sid].turnId = 1 + Math.floor(2*Math.random());// equal 1 or 2 (randomely)
           players[player2.sid].turnId = 3 - players[player1.sid].turnId;// equal 1 or 2 depending on players[player1.sid].turnId value
           
-
-          //games[player1.sid+player2.sid] = 
-
           //we tell the 2 players (only them) that the game is starting 
           var socket;
           
           socket = clients[player1.sid];
           socket.emit('startGame', player1, player2);
-          
           socket = clients[player2.sid];
           socket.emit('startGame', player2, player1);
-
-          console.log('player1.sid='+player1.sid);
-          console.log('player2.sid='+player2.sid);
-
+          // console.log('player1.sid='+player1.sid);
+          // console.log('player2.sid='+player2.sid);
           break;
         }
       }
@@ -156,8 +142,8 @@ io.on('connection', function (socket){
   players[socket.id] = { 
     sid:socket.id,
     pseudo:null,
-    dispo:false,//true if user is available for a new game
-    turnId: null,//user turn id, can be 1 or 2 (or null before and after the game) 
+    dispo:false,//true if the user is available for a new multiplayer game
+    turnId: null,//the user turn id, can be 1 or 2 (or null before and after the game) 
     opponent_sid:null,//socket.id of the opponent
     img:'human.png'//avatar
   };
@@ -225,6 +211,15 @@ server.listen(port, function(){
     console.log('L\'application est disponible à l\'adresse http://%s:%s', addressHost, port);
 });
 
+// var getIdFromPseudo = function(pseudo, players){
+//   for ( var prop in players) {
+//     //console.log("x=",players[prop].pseudo);
+//     if( players[prop].pseudo === pseudo){
+//       return players[prop].sid;//return prop would also work
+//     }
+//   }
+//   return null;
+// };
 
 // app.post('/connect4/comments', function(req, res) {
 //   fs.readFile(COMMENTS_FILE, function(err, data) {

@@ -8,7 +8,6 @@ var C4Fct = require('./connect4Fct.js');
 var debug = true;
 
 var MenuBar = React.createClass({
-
     getInitialState: function(){
       var index=0;
       //if the user refresh the page we stay on the previous page and we keep menu selection's setting
@@ -49,7 +48,6 @@ var MenuBar = React.createClass({
 
 var ChooseMode = React.createClass({
   handleChange: function(event) {
-    //console.log('id:',event.currentTarget.id);
     this.props.onClickOpponentType(event.currentTarget.id);
   },    
   render: function() {
@@ -101,7 +99,6 @@ var Mask = React.createClass({
       );
     });
    
-   
     var loader = false;
 
     if ( this.props.game.opponentType === 'robot' ){
@@ -119,7 +116,6 @@ var Mask = React.createClass({
       <div id="mask">
         
         { this.props.game.turn === null && this.props.game.opponentType === 'robot' ?  <div id="playAgain" onClick={that.playAgain}>Click to play again</div>  : null }
-        
         { loader ?  <div id="wait"><img id="loader" src="images/loading_apple.gif" alt="Please wait..."/></div> : null }
 
         {columns}
@@ -156,7 +152,6 @@ var ColumnMask = React.createClass({
   }
 });
 
-
 //{turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
 var NextTurnDisplay = React.createClass({
   render: function() {
@@ -175,7 +170,6 @@ var NextTurnDisplay = React.createClass({
     );
   }
 });
-
 
 var Grid = React.createClass({
   render: function() {
@@ -205,12 +199,10 @@ var Grid = React.createClass({
 
 var ColumnGrid = React.createClass({
   render: function() {
-    //var line = 6;
     var line = -1;
     var col = this.props.col;
     var classNames = this.props.classNames;
     var aligned = this.props.aligned;
-
     var lastCol = this.props.lastMove.col;
     var lastLine = this.props.lastMove.line;
     var blink =  this.props.lastMove.blink;
@@ -252,7 +244,6 @@ var Loader = React.createClass({
 
 
 var SettingZone = React.createClass({
-
   handleClick: function(event) {
     //console.log(event.currentTarget.id);
     this.props.onClickDifficulty(event.currentTarget.id);
@@ -367,12 +358,7 @@ var SettingZone = React.createClass({
 var Connect4 = React.createClass({
   
   componentDidUpdate : function() {
-    // var self = this;
-    // if ( self.state.game.opponentType === "human"){
-    //   console.log("ooooo");
-    //   self.state.game = new C4Fct.game();
-    //   self.forceUpdate();
-    // }
+
   },
 
   //componentDidMount is a method called automatically by React after a component is rendered for the first time. 
@@ -383,8 +369,6 @@ var Connect4 = React.createClass({
       //Let the computer play     
       setTimeout(function(){
         if ( self.state.game.turn === 1 ){
-          //get actual connect 4 game position in string notation       
-          //var pos = C4Fct.arrayToString(self.state.game.position);
           C4Fct.computerMove(self);
         }
       },2000);
@@ -397,9 +381,6 @@ var Connect4 = React.createClass({
     });
    
     socket.on('startGame', function (player1, player2){
-      //console.log('--- startGame signal ! --- ');
-      //console.log("Me:",player1);
-      //console.log("my opponent:",player2);
 
       self.state.game.turn = 1;//because 1 always start
       self.state.game.me = player1;
@@ -407,24 +388,26 @@ var Connect4 = React.createClass({
       
       self.state.game.nbMove = 0;
       self.state.game.position = [];//list of column's numbers successively played, first column is 1
-      self.state.game.grid = [//game map
-          [0, 0, 0, 0, 0, 0],//first column (grid's top first)
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-        ];
-      self.state.game.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-          [0, 0, 0, 0, 0, 0],
-        ];
+      self.state.game.grid = C4Fct.emptyGrid();
+        // [//game map
+        //   [0, 0, 0, 0, 0, 0],//first column (grid's top first)
+        //   [0, 0, 0, 0, 0, 0],
+        //   [0, 0, 0, 0, 0, 0],
+        //   [0, 0, 0, 0, 0, 0],
+        //   [0, 0, 0, 0, 0, 0],
+        //   [0, 0, 0, 0, 0, 0],
+        //   [0, 0, 0, 0, 0, 0],
+        // ];
+      self.state.game.aligned = C4Fct.emptyGrid();
+      // [//tells where to display the check symbol when 4 discs or more are aligned
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //   ];
 
       self.forceUpdate(); 
     });
@@ -537,7 +520,7 @@ var Connect4 = React.createClass({
           socket.emit('getPlayers');
           var pseudo = prompt("Choose a pseudo please",'Guest_'+C4Fct.getRandomIntInclusive(1,999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
-          //console.log('pseudo:',pseudo);
+          console.log('pseudo:',pseudo);
           if ( pseudo && pseudo.trim().length > 0 ){
             //that.state.game.pseudo = pseudo; 
             //C4Fct.getPlayers(that, function(players){
@@ -549,8 +532,6 @@ var Connect4 = React.createClass({
                 //that.updatePlayers(players);
                 //that.state.game.players = players;
                 that.forceUpdate();
-                //console.log("****");   
-
                 //ne fonctinnera pas si le user est deconnécté de la socket
                 socket.emit('addPlayer', pseudo);//we ask the server to add a new user to the users list
 
@@ -662,7 +643,7 @@ var Connect4 = React.createClass({
             //}
             break;
           default:
-            alert("an error");
+            alert("Oops, an error has occurred. Please refresh the page and retry.");
       }
     }else if(this.state.game.opponentType === "human"){
 
@@ -781,6 +762,7 @@ var Debug = React.createClass({
         <div>Me: {JSON.stringify(this.props.game.me)}</div>
         <div>My opponent: {JSON.stringify(this.props.game.opponent)}</div>        
         <div>grid: {JSON.stringify(this.props.game.grid)}</div>
+        <div>aligned: {JSON.stringify(this.props.game.aligned)}</div>
       </div>
     );
   }

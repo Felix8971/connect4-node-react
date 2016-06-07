@@ -3991,7 +3991,7 @@ module.exports = React.createClass({
 //Add new disc on connect4's grid
 var C4Fct = {
 
-  urlConnect4MP: "http://localhost:8080", //"http://www.felixdebon.fr", //dev
+  //urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
   //urlConnect4MP : "http://www.felixdebon.fr", //prod
 
   arrayToString: function (array) {
@@ -4031,11 +4031,20 @@ var C4Fct = {
     }
   },
 
+  emptyGrid: function () {
+    //can contain 3 differents value:
+    // 0 : for empty
+    // 1 : for red disc
+    // 2 : for blue disk
+    return [//game map
+    [0, 0, 0, 0, 0, 0], //first column (grid's top first)
+    [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
+  },
+
   game: function (level) {
     this.pseudo = null;
-    //this.myTurnId = null,//user turn id, can be 1 or 2 (or null before and after the game)
     this.turn = 1 + Math.floor(2 * Math.random()); // 1 or 2 randomely (tells us who is going to play by is code)
-    //we define it client side only in the case of a game against computer
+    //we define turn client side only in the case of a game against computer
     this.lastMove = {};
     this.opponentType = "robot"; //can be "robot" ou "human"
     this.level = level || "normal";
@@ -4044,18 +4053,12 @@ var C4Fct = {
     this.players = {};
     this.classNames = ["noDisc", "redDisc", "blueDisc"];
     this.urlSolver = "http://connect4.gamesolver.org/solve?";
-
     //this.urlConnect4MP = "http://connect4.gamesolver.org/solve?";
-
     this.me = {};
     this.opponent = {};
-
     this.position = []; //list of column's numbers successively played, first column is 1
-    this.grid = [//game map
-    [0, 0, 0, 0, 0, 0], //first column (grid's top first)
-    [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
-    this.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
-    [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
+    this.grid = C4Fct.emptyGrid(); //game matrix map
+    this.aligned = C4Fct.emptyGrid(); //tells where to display the check symbol when 4 discs or more are aligned
   },
 
   /**
@@ -4080,7 +4083,6 @@ var C4Fct = {
         }
       }
     }
-
     //console.log('stat:',stat);
     var statSorted = _.sortBy(stat, 'value').reverse();
     //console.log('statSorted:',statSorted);
@@ -4107,11 +4109,6 @@ var C4Fct = {
     "very hard": "hal.png"
   },
 
-  /**
-    * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
-    * and make the computer play 
-  **/
-
   // computerMove: function(_this){
   //   var game = _this.state.game;
   //   var pos = C4Fct.arrayToString(game.position);
@@ -4130,12 +4127,15 @@ var C4Fct = {
 
   // },
 
+  /**
+    * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
+    * and make the computer play 
+  **/
+
   computerMove: function (_this) {
     var game = _this.state.game;
     var pos = C4Fct.arrayToString(game.position);
-    //var pos ="32";
-    //console.log('pos=',pos);
-
+    //var pos ="32";//console.log('pos=',pos);
     var options = {
       method: 'GET'
     };
@@ -4152,11 +4152,8 @@ var C4Fct = {
 
       var stat = C4Fct.getArrayStat(array);
       var n = stat.length;
-      //alert(n);
-      //console.log('stat:',stat);
+      //console.log('n:'+ n+ ' stat:',stat);
       var columnPlayed;
-
-      //console.log("easy and nb choice " + n + ": "+C4Fct.getRankToPLayFromLevelAndNbrChoices["easy"][n-1]);
       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
       var rank = C4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n - 1];
 
@@ -4197,7 +4194,7 @@ var C4Fct = {
   },
 
   /**
-   * Try to add a disc on the game's grid  
+   * Try to add a disc on the game's grid,  
    * if it's possible we update the game object
   **/
   addDisc: function (game, col) {
@@ -4235,17 +4232,29 @@ var C4Fct = {
   testWin: function (game, lastMove) {
     //if optionCheck is true we record the aligned discs in game.aligned matrix
 
-    var test_alignment_EW = function (game, lastMove, optionCheck) {
+    var count = function (nbAlignedDisc, game) {
+      //count both direction
+      if (nbAlignedDisc >= 4) {
+        //yes it can be > 4 !
+        return true;
+      } else {
+        game.aligned = C4Fct.emptyGrid();
+        return false;
+      }
+    };
+
+    //use to verify if we have 4 chips horizontally aligned
+    //if we pass optionCheck === true the 'aligned' grid will be update
+    var test_alignment_EW = function (game, lastMove) {
       var nbAlignedDisc = 1;
-      //horizontal right direction
+      game.aligned[lastMove.col][lastMove.line] = true;
+      //Horizontal right direction
       //C4Fct.test_generic(0,1,7,1,0,0,1,0,game, lastMove, optionCheck);
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col + k < 7) {
           if (game.grid[lastMove.col + k][lastMove.line + 0] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col + k][lastMove.line + 0] = true;
-            }
+            game.aligned[lastMove.col + k][lastMove.line + 0] = true;
           } else {
             break;
           }
@@ -4254,74 +4263,50 @@ var C4Fct = {
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
       //C4Fct.test_generic(0,-1,0,1,0,0,-1,0,game, lastMove, optionCheck);
 
-      //horizontal left direction
+      //Horizontal left direction
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col - k >= 0) {
           if (game.grid[lastMove.col - k][lastMove.line + 0] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col - k][lastMove.line + 0] = true;
-            }
+            game.aligned[lastMove.col - k][lastMove.line + 0] = true;
           } else {
             break;
           }
         }
       }
       //console.log('nbAlignedDisc:'+nbAlignedDisc);
-      //count both direction
-      if (nbAlignedDisc >= 4) {
-        //yes it can be > 4 !
-        return true;
-      }
+      //count in both direction
+      return count(nbAlignedDisc, game);
     };
 
-    if (test_alignment_EW(game, lastMove, false)) {
-      //Now we know we have an alignment we can recall the function again to display it
-      test_alignment_EW(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true;
-      return true;
-    }
-
-    var test_alignment_NS = function (game, lastMove, optionCheck) {
+    var test_alignment_NS = function (game, lastMove) {
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true;
       //vertical down
       for (var k = 1; k <= 3; k++) {
         if (lastMove.line + k < 6) {
           if (game.grid[lastMove.col + 0][lastMove.line + k] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col + 0][lastMove.line + k] = true;
-            }
+            game.aligned[lastMove.col + 0][lastMove.line + k] = true;
           } else {
             break;
           }
         }
       }
-      //vertical up doesn't need to be checked (it will always be empty due to gravity effect)
-
+      //vertical up doesn't need to be checked (it will always be empty due to gravity effect...)
       //count
-      if (nbAlignedDisc >= 4) {
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     };
 
-    if (test_alignment_NS(game, lastMove, false)) {
-      //Now we know we have an alignment we can recall the function again to display it
-      test_alignment_NS(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true;
-      return true;
-    }
-
-    var test_alignment_NW = function (game, lastMove, optionCheck) {
+    var test_alignment_NW = function (game, lastMove) {
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true;
       //toward North/west
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col - k >= 0 && lastMove.line - k >= 0) {
           if (game.grid[lastMove.col - k][lastMove.line - k] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col - k][lastMove.line - k] = true;
-            }
+            game.aligned[lastMove.col - k][lastMove.line - k] = true;
           } else {
             break;
           }
@@ -4333,38 +4318,25 @@ var C4Fct = {
         if (lastMove.col + k < 7 && lastMove.line + k < 6) {
           if (game.grid[lastMove.col + k][lastMove.line + k] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col + k][lastMove.line + k] = true;
-            }
+            game.aligned[lastMove.col + k][lastMove.line + k] = true;
           } else {
             break;
           }
         }
       }
-
       //count
-      if (nbAlignedDisc >= 4) {
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     };
 
-    if (test_alignment_NW(game, lastMove, false)) {
-      //Now we know we have an alignment we can recall the function again to display it
-      test_alignment_NW(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true;
-      return true;
-    }
-
-    var test_alignment_NE = function (game, lastMove, optionCheck) {
+    var test_alignment_NE = function (game, lastMove) {
       var nbAlignedDisc = 1;
+      game.aligned[lastMove.col][lastMove.line] = true;
       //toward North/Est
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col + k < 7 && lastMove.line - k >= 0) {
           if (game.grid[lastMove.col + k][lastMove.line - k] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col + k][lastMove.line - k] = true;
-            }
+            game.aligned[lastMove.col + k][lastMove.line - k] = true;
           } else {
             break;
           }
@@ -4376,24 +4348,24 @@ var C4Fct = {
         if (lastMove.col - k >= 0 && lastMove.line + k < 6) {
           if (game.grid[lastMove.col - k][lastMove.line + k] === lastMove.turn) {
             nbAlignedDisc++;
-            if (optionCheck) {
-              game.aligned[lastMove.col - k][lastMove.line + k] = true;
-            }
+            game.aligned[lastMove.col - k][lastMove.line + k] = true;
           } else {
             break;
           }
         }
       }
-
       //count
-      if (nbAlignedDisc >= 4) {
-        return true;
-      }
+      return count(nbAlignedDisc, game);
     };
-    if (test_alignment_NE(game, lastMove, false)) {
-      //Now we know we have an alignment we can recall the function again to display it
-      test_alignment_NE(game, lastMove, true);
-      game.aligned[lastMove.col][lastMove.line] = true;
+
+    //we use the functions
+    if (test_alignment_EW(game, lastMove)) {
+      return true;
+    } else if (test_alignment_NS(game, lastMove)) {
+      return true;
+    } else if (test_alignment_NW(game, lastMove)) {
+      return true;
+    } else if (test_alignment_NE(game, lastMove)) {
       return true;
     }
   },
@@ -4494,11 +4466,10 @@ var socket = io();
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
-var debug = false;
+var debug = true;
 
 var MenuBar = React.createClass({
   displayName: 'MenuBar',
-
 
   getInitialState: function () {
     var index = 0;
@@ -4542,7 +4513,6 @@ var ChooseMode = React.createClass({
   displayName: 'ChooseMode',
 
   handleChange: function (event) {
-    //console.log('id:',event.currentTarget.id);
     this.props.onClickOpponentType(event.currentTarget.id);
   },
   render: function () {
@@ -4743,12 +4713,10 @@ var ColumnGrid = React.createClass({
   displayName: 'ColumnGrid',
 
   render: function () {
-    //var line = 6;
     var line = -1;
     var col = this.props.col;
     var classNames = this.props.classNames;
     var aligned = this.props.aligned;
-
     var lastCol = this.props.lastMove.col;
     var lastLine = this.props.lastMove.line;
     var blink = this.props.lastMove.blink;
@@ -4794,7 +4762,6 @@ var Loader = React.createClass({
 
 var SettingZone = React.createClass({
   displayName: 'SettingZone',
-
 
   handleClick: function (event) {
     //console.log(event.currentTarget.id);
@@ -4937,14 +4904,7 @@ var Connect4 = React.createClass({
   displayName: 'Connect4',
 
 
-  componentDidUpdate: function () {
-    // var self = this;
-    // if ( self.state.game.opponentType === "human"){
-    //   console.log("ooooo");
-    //   self.state.game = new C4Fct.game();
-    //   self.forceUpdate();
-    // }
-  },
+  componentDidUpdate: function () {},
 
   //componentDidMount is a method called automatically by React after a component is rendered for the first time.
   componentDidMount: function () {
@@ -4954,8 +4914,6 @@ var Connect4 = React.createClass({
       //Let the computer play    
       setTimeout(function () {
         if (self.state.game.turn === 1) {
-          //get actual connect 4 game position in string notation      
-          //var pos = C4Fct.arrayToString(self.state.game.position);
           C4Fct.computerMove(self);
         }
       }, 2000);
@@ -4968,9 +4926,6 @@ var Connect4 = React.createClass({
     });
 
     socket.on('startGame', function (player1, player2) {
-      //console.log('--- startGame signal ! --- ');
-      //console.log("Me:",player1);
-      //console.log("my opponent:",player2);
 
       self.state.game.turn = 1; //because 1 always start
       self.state.game.me = player1;
@@ -4978,11 +4933,26 @@ var Connect4 = React.createClass({
 
       self.state.game.nbMove = 0;
       self.state.game.position = []; //list of column's numbers successively played, first column is 1
-      self.state.game.grid = [//game map
-      [0, 0, 0, 0, 0, 0], //first column (grid's top first)
-      [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
-      self.state.game.aligned = [//tells where to display the check symbol when 4 discs or more are aligned
-      [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]];
+      self.state.game.grid = C4Fct.emptyGrid();
+      // [//game map
+      //   [0, 0, 0, 0, 0, 0],//first column (grid's top first)
+      //   [0, 0, 0, 0, 0, 0],
+      //   [0, 0, 0, 0, 0, 0],
+      //   [0, 0, 0, 0, 0, 0],
+      //   [0, 0, 0, 0, 0, 0],
+      //   [0, 0, 0, 0, 0, 0],
+      //   [0, 0, 0, 0, 0, 0],
+      // ];
+      self.state.game.aligned = C4Fct.emptyGrid();
+      // [//tells where to display the check symbol when 4 discs or more are aligned
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //     [0, 0, 0, 0, 0, 0],
+      //   ];
 
       self.forceUpdate();
     });
@@ -5093,7 +5063,7 @@ var Connect4 = React.createClass({
           socket.emit('getPlayers');
           var pseudo = prompt("Choose a pseudo please", 'Guest_' + C4Fct.getRandomIntInclusive(1, 999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
-          //console.log('pseudo:',pseudo);
+          console.log('pseudo:', pseudo);
           if (pseudo && pseudo.trim().length > 0) {
             //that.state.game.pseudo = pseudo;
             //C4Fct.getPlayers(that, function(players){
@@ -5105,8 +5075,6 @@ var Connect4 = React.createClass({
               //that.updatePlayers(players);
               //that.state.game.players = players;
               that.forceUpdate();
-              //console.log("****");  
-
               //ne fonctinnera pas si le user est deconnécté de la socket
               socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
             } else {
@@ -5222,7 +5190,7 @@ var Connect4 = React.createClass({
           //}
           break;
         default:
-          alert("an error");
+          alert("Oops, an error has occurred. Please refresh the page and retry.");
       }
     } else if (this.state.game.opponentType === "human") {
 
@@ -5380,6 +5348,12 @@ var Debug = React.createClass({
         null,
         'grid: ',
         JSON.stringify(this.props.game.grid)
+      ),
+      React.createElement(
+        'div',
+        null,
+        'aligned: ',
+        JSON.stringify(this.props.game.aligned)
       )
     );
   }
