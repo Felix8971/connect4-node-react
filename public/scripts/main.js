@@ -5,7 +5,7 @@ var socket = io();
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
-var debug = false;
+var debug = true;
 
 var MenuBar = React.createClass({
 
@@ -390,25 +390,11 @@ var Connect4 = React.createClass({
       },2000);
     }
 
-    // socket.on('players', function (players) {
-    //   console.log('players');
-    //   self.state.game.players = players;
-
-    //   //si l'opponent courant de pseudo est parti on reinitialise le jeu
-    //   if ( self.state.game.opponent ){
-    //     if ( !C4Fct.isPseudoUsed(self.state.game.opponent,players) && self.state.game.opponentType === "human" ){
-    //       alert("Your opponent is gone (You win!)");
-    //       self.state.game = new C4Fct.game();
-    //     }
-
-    //     if ( !players[self.state.game.opponentSid].dispo ){
-    //       alert("Your opponent is gone (You win!)");
-    //       self.state.game = new C4Fct.game();
-    //     }
-    //   }
-
-    //   self.forceUpdate();
-    // });
+    socket.on('players', function (players) {
+      console.log('players');
+      self.state.game.players = players;
+      self.forceUpdate();
+    });
    
     socket.on('startGame', function (player1, player2){
       //console.log('--- startGame signal ! --- ');
@@ -452,7 +438,7 @@ var Connect4 = React.createClass({
       self.state.game.winner = self.state.game.me.turnId;
       self.state.game.turn = null;
       self.forceUpdate(function(){
-        alert("You opponent resigns. You win the game!");  
+        alert("You opponent resigns. You win the game!"); 
         //reinit the game
         self.state.game = new C4Fct.game();
         self.state.game.turn = null;
@@ -478,14 +464,28 @@ var Connect4 = React.createClass({
         self.state.game.winner = 3-self.state.game.me.turnId;
         self.state.game.turn = null;
         self.forceUpdate(function(){
+          socket.emit('gameEnd');
           alert("You loose!");
+
           //reinit the game
-          self.state.game = new C4Fct.game();
-          self.state.game.turn = null;
-          self.forceUpdate(); 
+          // self.state.game = new C4Fct.game();
+          // //self.state.game.turn = null;
+          // self.forceUpdate(); 
+
+          //Rem: setState works asynchronously so we need to use a callback to launch the game:
+          self.setState({ game : new C4Fct.game(self.state.game.level) }, function(){
+            //console.log("turn:",self.state.game.turn);
+            if ( self.state.game.turn === 1 ){//faire jouer la machine    
+              C4Fct.computerMove(self);
+            }else{
+              //no code here because this.handleUserClick() will be called on the click event
+            }
+          });
+
+
         });   
       }else if( self.state.game.nbMove == 42 ){//if no winner and grid full then draw game 
-        self.state.game.turn = null;
+        //self.state.game.turn = null;
         alert("draw 0-0 !");
         //reinit the game
         self.state.game = new C4Fct.game();
@@ -532,14 +532,18 @@ var Connect4 = React.createClass({
       if ( value === "human"){
         //If user doesn't have a pseudo we ask him to choose one (a default pseudo is given anyway)
         while ( !that.state.game.pseudo ){
+
+          //envoyer une demande de maj de players via une web socket ici 
+          socket.emit('getPlayers');
           var pseudo = prompt("Choose a pseudo please",'Guest_'+C4Fct.getRandomIntInclusive(1,999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
-          if ( pseudo.trim().length > 0 ){
-            that.state.game.pseudo = pseudo; 
-            C4Fct.getPlayers(function(players){
+          //console.log('pseudo:',pseudo);
+          if ( pseudo && pseudo.trim().length > 0 ){
+            //that.state.game.pseudo = pseudo; 
+            //C4Fct.getPlayers(that, function(players){
               //console.log('players===>',players);
-              if ( !C4Fct.isPseudoUsed(pseudo, players) ){
-
+              if ( !C4Fct.isPseudoUsed(pseudo, that.state.game.players) ){
+                that.state.game.pseudo = pseudo; 
                 //console.log("pseudo valid:",pseudo);         
                 that.updatePseudo(pseudo);
                 //that.updatePlayers(players);
@@ -553,8 +557,16 @@ var Connect4 = React.createClass({
               }else{
                 alert("This pseudo is already used, choose a new one !");
               }            
-            });
-
+            //});
+          }else{//return to robot mode
+            that.setState({ game : new C4Fct.game(that.state.game.level) }, function(){
+              if ( that.state.game.turn === 1 ){//faire jouer la machine    
+                C4Fct.computerMove(that);
+              }else{
+                //no code here because this.handleUserClick() will be called on the click event
+              }
+            });  
+            break;            
           }
         }
       }
@@ -562,10 +574,11 @@ var Connect4 = React.createClass({
       if ( value === "robot"){
 
         //that.state.game.connected = false;
+        console.log("-opponent-:",that.state.game.opponent);
         socket.emit('leaveGame');
         that.state.game.me = {};
         that.state.game.opponent = {};
-         that.forceUpdate();      
+        that.forceUpdate();      
         //Rem: setState works asynchronously so we need to use a callback:
         that.setState({ game : new C4Fct.game(that.state.game.level) }, function(){
           //console.log("turn:",that.state.game.turn);
@@ -673,17 +686,29 @@ var Connect4 = React.createClass({
           this.state.game.nbMove++;
           this.forceUpdate();
 
-          //it is a winning move ?
+          //is it a winning move ?
           var win = C4Fct.testWin(this.state.game, lastMove);
           if ( win ){
             this.state.game.winner = this.state.game.me.turnId;
-            this.state.game.turn = null;     
+            //this.state.game.turn = null;     
             //this.setState({ game : game });
             this.forceUpdate(function(){
+              socket.emit('gameEnd');
               alert("You win!"); 
               //reinit the game
-              this.state.game = new C4Fct.game();
-              this.forceUpdate();   
+              // this.state.game = new C4Fct.game();
+              // this.forceUpdate();
+              var self = this;
+              //Rem: setState works asynchronously so we need to use a callback to launch the game:
+              this.setState({ game : new C4Fct.game(this.state.game.level) }, function(){
+                //console.log("turn:",self.state.game.turn);
+                if ( self.state.game.turn === 1 ){//faire jouer la machine    
+                  C4Fct.computerMove(self);
+                }else{
+                  //no code here because this.handleUserClick() will be called on the click event
+                }
+              });
+
             });                         
           }else{
             //if no winner and grid full then draw game 
@@ -730,7 +755,7 @@ var Connect4 = React.createClass({
       <div id="container">
         
         <div className="content game" >
-            {debug ? <Debug game={this.state.game}/>: null }
+            {debug ? <Debug game={this.state.game}/> : null }
             <SettingZone 
               game = {this.state.game} 
               onClickDifficulty = {this.handleChangeDifficulty}
@@ -749,13 +774,25 @@ var Debug = React.createClass({
     return (
       <div>
         <div>opponentType: {this.props.game.opponentType}</div>
-        <div>Me: {this.props.game.pseudo}</div>
-        <div>My opponent: {this.props.game.opponent.pseudo}</div>    
-        <div>turn: {this.props.game.turn}</div>    
+        <div>game.pseudo: {this.props.game.pseudo}</div>
+        <div>turn: {this.props.game.turn}</div>
+        <div>nbMove: {this.props.game.nbMove}</div>  
+        <div>lastMove: {JSON.stringify(this.props.game.lastMove)}</div>   
+        <div>Me: {JSON.stringify(this.props.game.me)}</div>
+        <div>My opponent: {JSON.stringify(this.props.game.opponent)}</div>        
+        <div>grid: {JSON.stringify(this.props.game.grid)}</div>
       </div>
     );
   }
 });
+
+        // <div>Me: {this.props.game.me}</div>
+        // <div>My opponent: {this.props.game.opponent}</div>   
+        //   <div>lastMove: {this.props.game.lastMove}</div>  
+        // 
+        //  <div>Me: {this.props.game.me}</div>
+        // <div>grid: {this.props.game.grid}</div>  
+
 
 // ReactDOM.render(
 //   <Connect4 />,
@@ -787,7 +824,6 @@ var App = React.createClass({
 });
 
 
-
 //ReactDOM.render(<Loader/>, document.body);
 
 //allow us to remove the ReactRouter prefix from our Router and Route component instances below
@@ -811,63 +847,3 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-
-// var UserGist = React.createClass({
-//   getInitialState: function() {
-//     return {
-//       username: '',
-//       lastGistUrl: ''
-//     };
-//   },
-
-//   componentDidMount: function() {
-//     this.serverRequest = $.get(this.props.source, function (result) {
-//       var lastGist = result[0];
-//       this.setState({
-//         username: lastGist.owner.login,
-//         lastGistUrl: lastGist.html_url
-//       });
-//     }.bind(this));
-//   },
-
-//   componentWillUnmount: function() {
-//     this.serverRequest.abort();
-//   },
-
-//   render: function() {
-//     return (
-//       <div>
-//         {this.state.username} s last gist is
-//         <a href={this.state.lastGistUrl}>here</a>.
-//       </div>
-//     );
-//   }
-// });
-
-// <UserGist source="https://api.github.com/users/octocat/gists" />
-
-
-  // getInitialState: function() {
-  //   return {
-  //     windowWidth: window.innerWidth
-  //   };
-  // },
-
-  // handleResize: function(e) {
-  //   this.setState({windowWidth: window.innerWidth});
-  //   console.log("windowWidth=",this.state.windowWidth);
-  //   console.log("maskHeight=",document.getElementById('mask').Width);
-  // },
-
-  //componentDidMount: function() {
-    //window.addEventListener('resize', this.handleResize);
-  //},
-
-  //componentWillUnmount: function() {
-    //window.removeEventListener('resize', this.handleResize);
-  //},
-
-  // render: function() {
-  //   var style = {visibility:'hidden'};
-  //   return <div style={style}>Current window width: {this.state.windowWidth}</div>;
-  // }

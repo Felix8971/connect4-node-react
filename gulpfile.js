@@ -33,7 +33,7 @@ gulp.task('css', function() {
 
 //concat && minify js in 1 file 
 gulp.task('js_lib', function() {//we’re defining a task named js
-  gulp.src([pathLib+'react.min.js',
+  gulp.src([pathLib+'react.js',
             pathLib+'react-dom.min.js',
             pathLib+'browser.min.js',
             pathLib+'ReactRouter.min.js',

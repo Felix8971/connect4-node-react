@@ -1,6 +1,9 @@
 //Add new disc on connect4's grid
 var C4Fct = {
   
+  urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
+  //urlConnect4MP : "http://www.felixdebon.fr", //prod
+
   arrayToString: function(array){
     var n = array.length;
     var s = "";
@@ -24,7 +27,6 @@ var C4Fct = {
 
 
   isPseudoUsed: function (pseudo, players){
-    console.log('isPseudoUsed');
     for ( var prop in players) {
       if( players[prop].pseudo === pseudo){
         return true;
@@ -50,9 +52,11 @@ var C4Fct = {
         this.level = level || "normal";
         this.nbMove = 0;
         this.winner = 0;
-        
+        this.players = {};      
         this.classNames = ["noDisc","redDisc","blueDisc"];
-        this.url = "http://connect4.gamesolver.org/solve?";
+        this.urlSolver = "http://connect4.gamesolver.org/solve?";
+
+        //this.urlConnect4MP = "http://connect4.gamesolver.org/solve?";
         
         this.me = {};
         this.opponent = {};
@@ -136,7 +140,7 @@ var C4Fct = {
   //   var game = _this.state.game;
   //   var pos = C4Fct.arrayToString(game.position);
   //   $.ajax({
-  //     url: game.url,
+  //     url: game.urlSolver,
   //     data:{pos:pos},
   //     dataType: 'json',
   //     cache: false,
@@ -144,7 +148,7 @@ var C4Fct = {
   //       console.log("data with jquery:",data);
   //     }.bind(_this),
   //     error: function(xhr, status, err) {
-  //       console.error(_this.props.url, status, err.toString());
+  //       console.error(_this.props.urlSolver, status, err.toString());
   //     }.bind(_this)
   //   });
 
@@ -161,7 +165,7 @@ var C4Fct = {
       method: 'GET'
     };
 
-    fetch(game.url+"pos="+pos, options).then(function(res) {
+    fetch(game.urlSolver+"pos="+pos, options).then(function(res) {
       return res.json();
     }).then(function(data){
       //console.log('data=',data);
@@ -184,6 +188,8 @@ var C4Fct = {
       //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
      
+      _this.state.game.turn = 1;
+
       var lastMove = C4Fct.addDisc(game, columnPlayed);
       _this.state.game.lastMove = lastMove;
       _this.state.game.lastMove.blink = true;
@@ -421,9 +427,9 @@ var C4Fct = {
   },
 
 
-  // getData: function(url, callback){
+  // getData: function(urlSolver, callback){
   //   var options = { method: 'GET' };
-  //   fetch(url, options).then(function(res) {
+  //   fetch(urlSolver, options).then(function(res) {
   //     return res.json();
   //   })
   //   .then(function(data){
@@ -435,38 +441,37 @@ var C4Fct = {
   //   }); 
   // },
 
-  getPlayers: function(callback){
+
+  // getPlayers: function(that, callback){
+  //   $.ajax({
+  //     url: "http://www.felixdebon.fr/connect4/getplayers",
+  //     //url: "/connect4/getplayers",
+  //     dataType: 'json',
+  //     cache: false,
+  //     success: function(data) {
+  //       callback(data); 
+  //       console.log("data with jquery:",data);
+  //     }.bind(that),
+  //     error: function(xhr, status, err) {
+  //       console.log('There has been a problem with your $.ajax operation 2: ' + err.message);
+  //     }.bind(that)
+  //   });
+  // },
+
+  getPlayers: function(that, callback){
     var options = { method: 'GET' };
-    fetch("/api/getplayers", options).then(function(res) {
+    fetch("www.felixdebon.fr/connect4/getplayers", options).then(function(res) {
       return res.json();
     })
     .then(function(data){
       //console.log("players recue=",data);
       callback(data);        
-    })
+    }.bind(that) )
     .catch(function(error) {
       console.log('There has been a problem with your fetch operation 2: ' + error.message);
     }); 
   },
 
-
-  // getOpponent: function(pseudo, callback){
-  //   //----- Find an opponent for pseudo ------
-  //   //Notice that if players change we will be inform by the server (it will send a "addPlayer" socket)
-  //   //we fetch the server here to choose server side the opponent for pseudo
-  //   var options = { method: 'GET' };
-  //   fetch("/api/getopponent/"+pseudo, options).then(function(res) {
-  //     return res.json();
-  //   }).then(function(data){
-  //     callback(data);   
-  //   })
-  //   .catch(function(error) {
-  //     console.log('There has been a problem with your fetch operation 1: ' + error.message);
-  //   });
-
-  // },
-
 };
-
 
 module.exports = C4Fct;

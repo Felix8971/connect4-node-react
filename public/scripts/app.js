@@ -3991,6 +3991,9 @@ module.exports = React.createClass({
 //Add new disc on connect4's grid
 var C4Fct = {
 
+  urlConnect4MP: "http://localhost:8080", //"http://www.felixdebon.fr", //dev
+  //urlConnect4MP : "http://www.felixdebon.fr", //prod
+
   arrayToString: function (array) {
     var n = array.length;
     var s = "";
@@ -4013,7 +4016,6 @@ var C4Fct = {
   },
 
   isPseudoUsed: function (pseudo, players) {
-    console.log('isPseudoUsed');
     for (var prop in players) {
       if (players[prop].pseudo === pseudo) {
         return true;
@@ -4039,9 +4041,11 @@ var C4Fct = {
     this.level = level || "normal";
     this.nbMove = 0;
     this.winner = 0;
-
+    this.players = {};
     this.classNames = ["noDisc", "redDisc", "blueDisc"];
-    this.url = "http://connect4.gamesolver.org/solve?";
+    this.urlSolver = "http://connect4.gamesolver.org/solve?";
+
+    //this.urlConnect4MP = "http://connect4.gamesolver.org/solve?";
 
     this.me = {};
     this.opponent = {};
@@ -4112,7 +4116,7 @@ var C4Fct = {
   //   var game = _this.state.game;
   //   var pos = C4Fct.arrayToString(game.position);
   //   $.ajax({
-  //     url: game.url,
+  //     url: game.urlSolver,
   //     data:{pos:pos},
   //     dataType: 'json',
   //     cache: false,
@@ -4120,7 +4124,7 @@ var C4Fct = {
   //       console.log("data with jquery:",data);
   //     }.bind(_this),
   //     error: function(xhr, status, err) {
-  //       console.error(_this.props.url, status, err.toString());
+  //       console.error(_this.props.urlSolver, status, err.toString());
   //     }.bind(_this)
   //   });
 
@@ -4136,7 +4140,7 @@ var C4Fct = {
       method: 'GET'
     };
 
-    fetch(game.url + "pos=" + pos, options).then(function (res) {
+    fetch(game.urlSolver + "pos=" + pos, options).then(function (res) {
       return res.json();
     }).then(function (data) {
       //console.log('data=',data);
@@ -4158,6 +4162,8 @@ var C4Fct = {
 
       //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
+
+      _this.state.game.turn = 1;
 
       var lastMove = C4Fct.addDisc(game, columnPlayed);
       _this.state.game.lastMove = lastMove;
@@ -4392,9 +4398,9 @@ var C4Fct = {
     }
   },
 
-  // getData: function(url, callback){
+  // getData: function(urlSolver, callback){
   //   var options = { method: 'GET' };
-  //   fetch(url, options).then(function(res) {
+  //   fetch(urlSolver, options).then(function(res) {
   //     return res.json();
   //   })
   //   .then(function(data){
@@ -4406,35 +4412,35 @@ var C4Fct = {
   //   });
   // },
 
-  getPlayers: function (callback) {
+  // getPlayers: function(that, callback){
+  //   $.ajax({
+  //     url: "http://www.felixdebon.fr/connect4/getplayers",
+  //     //url: "/connect4/getplayers",
+  //     dataType: 'json',
+  //     cache: false,
+  //     success: function(data) {
+  //       callback(data);
+  //       console.log("data with jquery:",data);
+  //     }.bind(that),
+  //     error: function(xhr, status, err) {
+  //       console.log('There has been a problem with your $.ajax operation 2: ' + err.message);
+  //     }.bind(that)
+  //   });
+  // },
+
+  getPlayers: function (that, callback) {
     var options = { method: 'GET' };
-    fetch("/api/getplayers", options).then(function (res) {
+    fetch("www.felixdebon.fr/connect4/getplayers", options).then(function (res) {
       return res.json();
     }).then(function (data) {
       //console.log("players recue=",data);
       callback(data);
-    }).catch(function (error) {
+    }.bind(that)).catch(function (error) {
       console.log('There has been a problem with your fetch operation 2: ' + error.message);
     });
   }
 
 };
-
-// getOpponent: function(pseudo, callback){
-//   //----- Find an opponent for pseudo ------
-//   //Notice that if players change we will be inform by the server (it will send a "addPlayer" socket)
-//   //we fetch the server here to choose server side the opponent for pseudo
-//   var options = { method: 'GET' };
-//   fetch("/api/getopponent/"+pseudo, options).then(function(res) {
-//     return res.json();
-//   }).then(function(data){
-//     callback(data);  
-//   })
-//   .catch(function(error) {
-//     console.log('There has been a problem with your fetch operation 1: ' + error.message);
-//   });
-
-// },
 
 module.exports = C4Fct;
 
@@ -4955,25 +4961,11 @@ var Connect4 = React.createClass({
       }, 2000);
     }
 
-    // socket.on('players', function (players) {
-    //   console.log('players');
-    //   self.state.game.players = players;
-
-    //   //si l'opponent courant de pseudo est parti on reinitialise le jeu
-    //   if ( self.state.game.opponent ){
-    //     if ( !C4Fct.isPseudoUsed(self.state.game.opponent,players) && self.state.game.opponentType === "human" ){
-    //       alert("Your opponent is gone (You win!)");
-    //       self.state.game = new C4Fct.game();
-    //     }
-
-    //     if ( !players[self.state.game.opponentSid].dispo ){
-    //       alert("Your opponent is gone (You win!)");
-    //       self.state.game = new C4Fct.game();
-    //     }
-    //   }
-
-    //   self.forceUpdate();
-    // });
+    socket.on('players', function (players) {
+      console.log('players');
+      self.state.game.players = players;
+      self.forceUpdate();
+    });
 
     socket.on('startGame', function (player1, player2) {
       //console.log('--- startGame signal ! --- ');
@@ -5029,20 +5021,33 @@ var Connect4 = React.createClass({
         self.state.game.winner = 3 - self.state.game.me.turnId;
         self.state.game.turn = null;
         self.forceUpdate(function () {
+          socket.emit('gameEnd');
           alert("You loose!");
+
           //reinit the game
-          self.state.game = new C4Fct.game();
-          self.state.game.turn = null;
-          self.forceUpdate();
+          // self.state.game = new C4Fct.game();
+          // //self.state.game.turn = null;
+          // self.forceUpdate();
+
+          //Rem: setState works asynchronously so we need to use a callback to launch the game:
+          self.setState({ game: new C4Fct.game(self.state.game.level) }, function () {
+            //console.log("turn:",self.state.game.turn);
+            if (self.state.game.turn === 1) {
+              //faire jouer la machine   
+              C4Fct.computerMove(self);
+            } else {
+              //no code here because this.handleUserClick() will be called on the click event
+            }
+          });
         });
       } else if (self.state.game.nbMove == 42) {
-        //if no winner and grid full then draw game
-        self.state.game.turn = null;
-        alert("draw 0-0 !");
-        //reinit the game
-        self.state.game = new C4Fct.game();
-        self.forceUpdate();
-      }
+          //if no winner and grid full then draw game
+          //self.state.game.turn = null;
+          alert("draw 0-0 !");
+          //reinit the game
+          self.state.game = new C4Fct.game();
+          self.forceUpdate();
+        }
 
       self.state.game.turn = self.state.game.me.turnId;
       self.forceUpdate();
@@ -5083,34 +5088,50 @@ var Connect4 = React.createClass({
       if (value === "human") {
         //If user doesn't have a pseudo we ask him to choose one (a default pseudo is given anyway)
         while (!that.state.game.pseudo) {
+
+          //envoyer une demande de maj de players via une web socket ici
+          socket.emit('getPlayers');
           var pseudo = prompt("Choose a pseudo please", 'Guest_' + C4Fct.getRandomIntInclusive(1, 999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
-          if (pseudo.trim().length > 0) {
-            that.state.game.pseudo = pseudo;
-            C4Fct.getPlayers(function (players) {
-              //console.log('players===>',players);
-              if (!C4Fct.isPseudoUsed(pseudo, players)) {
+          //console.log('pseudo:',pseudo);
+          if (pseudo && pseudo.trim().length > 0) {
+            //that.state.game.pseudo = pseudo;
+            //C4Fct.getPlayers(that, function(players){
+            //console.log('players===>',players);
+            if (!C4Fct.isPseudoUsed(pseudo, that.state.game.players)) {
+              that.state.game.pseudo = pseudo;
+              //console.log("pseudo valid:",pseudo);        
+              that.updatePseudo(pseudo);
+              //that.updatePlayers(players);
+              //that.state.game.players = players;
+              that.forceUpdate();
+              //console.log("****");  
 
-                //console.log("pseudo valid:",pseudo);        
-                that.updatePseudo(pseudo);
-                //that.updatePlayers(players);
-                //that.state.game.players = players;
-                that.forceUpdate();
-                //console.log("****");  
-
-                //ne fonctinnera pas si le user est deconnécté de la socket
-                socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
-              } else {
-                  alert("This pseudo is already used, choose a new one !");
+              //ne fonctinnera pas si le user est deconnécté de la socket
+              socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
+            } else {
+                alert("This pseudo is already used, choose a new one !");
+              }
+            //});
+          } else {
+              //return to robot mode
+              that.setState({ game: new C4Fct.game(that.state.game.level) }, function () {
+                if (that.state.game.turn === 1) {
+                  //faire jouer la machine   
+                  C4Fct.computerMove(that);
+                } else {
+                  //no code here because this.handleUserClick() will be called on the click event
                 }
-            });
-          }
+              });
+              break;
+            }
         }
       }
 
       if (value === "robot") {
 
         //that.state.game.connected = false;
+        console.log("-opponent-:", that.state.game.opponent);
         socket.emit('leaveGame');
         that.state.game.me = {};
         that.state.game.opponent = {};
@@ -5226,43 +5247,55 @@ var Connect4 = React.createClass({
           this.state.game.nbMove++;
           this.forceUpdate();
 
-          //it is a winning move ?
+          //is it a winning move ?
           var win = C4Fct.testWin(this.state.game, lastMove);
           if (win) {
             this.state.game.winner = this.state.game.me.turnId;
-            this.state.game.turn = null;
+            //this.state.game.turn = null;    
             //this.setState({ game : game });
             this.forceUpdate(function () {
+              socket.emit('gameEnd');
               alert("You win!");
               //reinit the game
-              this.state.game = new C4Fct.game();
-              this.forceUpdate();
+              // this.state.game = new C4Fct.game();
+              // this.forceUpdate();
+              var self = this;
+              //Rem: setState works asynchronously so we need to use a callback to launch the game:
+              this.setState({ game: new C4Fct.game(this.state.game.level) }, function () {
+                //console.log("turn:",self.state.game.turn);
+                if (self.state.game.turn === 1) {
+                  //faire jouer la machine   
+                  C4Fct.computerMove(self);
+                } else {
+                  //no code here because this.handleUserClick() will be called on the click event
+                }
+              });
             });
           } else {
-            //if no winner and grid full then draw game
-            if (this.state.game.nbMove == 42) {
-              this.state.game.turn = null;
-              this.forceUpdate(function () {
-                alert("draw 0-0 !");
-                //reinit the game
-                this.state.game = new C4Fct.game();
+              //if no winner and grid full then draw game
+              if (this.state.game.nbMove == 42) {
+                this.state.game.turn = null;
+                this.forceUpdate(function () {
+                  alert("draw 0-0 !");
+                  //reinit the game
+                  this.state.game = new C4Fct.game();
+                  this.forceUpdate();
+                });
+              } else {
+                //opponent's turn
+                this.state.game.turn = 3 - this.state.game.me.turnId;
+
+                //socket.emit('addDisc',col);//tell server to tell opponent that i have added a disc on column col
+
+                //get actual connect 4 game position in string notation      
+                //var pos = C4Fct.arrayToString(this.state.game.position);
+                //console.log("pos=",pos);
+
+                //get the solution from Pascal Pons "alpha beta pruning" algorithm
+                //C4Fct.computerMove(this);
                 this.forceUpdate();
-              });
-            } else {
-              //opponent's turn
-              this.state.game.turn = 3 - this.state.game.me.turnId;
-
-              //socket.emit('addDisc',col);//tell server to tell opponent that i have added a disc on column col
-
-              //get actual connect 4 game position in string notation      
-              //var pos = C4Fct.arrayToString(this.state.game.position);
-              //console.log("pos=",pos);
-
-              //get the solution from Pascal Pons "alpha beta pruning" algorithm
-              //C4Fct.computerMove(this);
-              this.forceUpdate();
+              }
             }
-          }
         }
       } else {
         //reinit the game
@@ -5309,24 +5342,55 @@ var Debug = React.createClass({
       React.createElement(
         'div',
         null,
-        'Me: ',
+        'game.pseudo: ',
         this.props.game.pseudo
-      ),
-      React.createElement(
-        'div',
-        null,
-        'My opponent: ',
-        this.props.game.opponent.pseudo
       ),
       React.createElement(
         'div',
         null,
         'turn: ',
         this.props.game.turn
+      ),
+      React.createElement(
+        'div',
+        null,
+        'nbMove: ',
+        this.props.game.nbMove
+      ),
+      React.createElement(
+        'div',
+        null,
+        'lastMove: ',
+        JSON.stringify(this.props.game.lastMove)
+      ),
+      React.createElement(
+        'div',
+        null,
+        'Me: ',
+        JSON.stringify(this.props.game.me)
+      ),
+      React.createElement(
+        'div',
+        null,
+        'My opponent: ',
+        JSON.stringify(this.props.game.opponent)
+      ),
+      React.createElement(
+        'div',
+        null,
+        'grid: ',
+        JSON.stringify(this.props.game.grid)
       )
     );
   }
 });
+
+// <div>Me: {this.props.game.me}</div>
+// <div>My opponent: {this.props.game.opponent}</div>  
+//   <div>lastMove: {this.props.game.lastMove}</div> 
+//
+//  <div>Me: {this.props.game.me}</div>
+// <div>grid: {this.props.game.grid}</div> 
 
 // ReactDOM.render(
 //   <Connect4 />,
@@ -5385,65 +5449,6 @@ React.createElement(
     React.createElement(Route, { path: 'contact', component: Contact })
   )
 ), document.getElementById('container'));
-
-// var UserGist = React.createClass({
-//   getInitialState: function() {
-//     return {
-//       username: '',
-//       lastGistUrl: ''
-//     };
-//   },
-
-//   componentDidMount: function() {
-//     this.serverRequest = $.get(this.props.source, function (result) {
-//       var lastGist = result[0];
-//       this.setState({
-//         username: lastGist.owner.login,
-//         lastGistUrl: lastGist.html_url
-//       });
-//     }.bind(this));
-//   },
-
-//   componentWillUnmount: function() {
-//     this.serverRequest.abort();
-//   },
-
-//   render: function() {
-//     return (
-//       <div>
-//         {this.state.username} s last gist is
-//         <a href={this.state.lastGistUrl}>here</a>.
-//       </div>
-//     );
-//   }
-// });
-
-// <UserGist source="https://api.github.com/users/octocat/gists" />
-
-// getInitialState: function() {
-//   return {
-//     windowWidth: window.innerWidth
-//   };
-// },
-
-// handleResize: function(e) {
-//   this.setState({windowWidth: window.innerWidth});
-//   console.log("windowWidth=",this.state.windowWidth);
-//   console.log("maskHeight=",document.getElementById('mask').Width);
-// },
-
-//componentDidMount: function() {
-//window.addEventListener('resize', this.handleResize);
-//},
-
-//componentWillUnmount: function() {
-//window.removeEventListener('resize', this.handleResize);
-//},
-
-// render: function() {
-//   var style = {visibility:'hidden'};
-//   return <div style={style}>Current window width: {this.state.windowWidth}</div>;
-// }
 
 },{"./about.js":37,"./connect4Fct.js":38,"./contact.js":39}],41:[function(require,module,exports){
 // shim for using process in browser

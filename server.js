@@ -12,7 +12,7 @@ var server = require('http').Server(app);
 
 //var COMMENTS_FILE = path.join(__dirname, 'comments.json');
 
-var port = process.env['PORT'] || 3000;
+var port = process.env['PORT'] || 8080;
 
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
@@ -23,14 +23,16 @@ app.use(bodyParser.urlencoded({extended: true}));
 var ios = require('socket.io-express-session');
 var io = require('socket.io')(server);
 //io.use(ios(session)); // session support
-db = require('./db');//module à part pour gerer les acces bdd
+var db = require('./db');//module à part pour gerer les acces bdd
 
 //var url_mongo = 'mongodb://localhost:27017/connect4';//27017 est le port par defaut pour mongodb si on ne le precise pas. On peut passer plusieurs hotes pour acceder à des bases sur plusieures serveurs
 
 var players = {};//players list
-var games = {};//liste of the current games
+var games = {};//list of the current games
 
 var _socket = null;
+var urlConnect4MP = "http://localhost:8080"; //"http://www.felixdebon.fr"; //dev
+//var  urlConnect4MP = "http://www.felixdebon.fr"; //prod
 
 // setInterval(function(){
 //   console.log('players list=>',players);
@@ -49,8 +51,8 @@ var getIdFromPseudo = function(pseudo, players){
 };
 
 //ask players list to the server (use by the client to check if a pseudo is free)
-app.get('/api/getplayers', function(req, res) {
-  console.log("/api/getplayers");
+app.get('/connect4/getplayers', function(req, res) {
+  console.log("/connect4/getplayers");
   res.json(players);
 });
 
@@ -159,6 +161,13 @@ io.on('connection', function (socket){
     opponent_sid:null,
     img:'human.png'
   };
+  
+  socket.emit('players',players);
+
+  socket.on('getPlayers', function(){ 
+    console.log('players');
+    socket.emit('players',players);//envoie juste au client connecté
+  });
 
   socket.on('addPlayer', function (pseudo) {
     console.log('addPlayer '+pseudo);
@@ -196,6 +205,11 @@ io.on('connection', function (socket){
     //io.sockets.emit('players', players);//send to all clients when a client leave the 'Human mode'
   });  
 
+  //if a user leave the game we remove him from users list and we inform other clients
+  socket.on('gameEnd', function(){
+    console.log('gameEnd');
+    inactivatePlayer(socket.id);
+  });  
 
   socket.on('addDisc', function(col){
     //console.log('addDisc on col '+ col);
@@ -215,7 +229,7 @@ server.listen(port, function(){
 });
 
 
-// app.post('/api/comments', function(req, res) {
+// app.post('/connect4/comments', function(req, res) {
 //   fs.readFile(COMMENTS_FILE, function(err, data) {
 //     if (err) {
 //       console.error(err);

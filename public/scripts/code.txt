@@ -1,0 +1,60 @@
+
+// var UserGist = React.createClass({
+//   getInitialState: function() {
+//     return {
+//       username: '',
+//       lastGistUrl: ''
+//     };
+//   },
+
+//   componentDidMount: function() {
+//     this.serverRequest = $.get(this.props.source, function (result) {
+//       var lastGist = result[0];
+//       this.setState({
+//         username: lastGist.owner.login,
+//         lastGistUrl: lastGist.html_url
+//       });
+//     }.bind(this));
+//   },
+
+//   componentWillUnmount: function() {
+//     this.serverRequest.abort();
+//   },
+
+//   render: function() {
+//     return (
+//       <div>
+//         {this.state.username} s last gist is
+//         <a href={this.state.lastGistUrl}>here</a>.
+//       </div>
+//     );
+//   }
+// });
+
+// <UserGist source="https://api.github.com/users/octocat/gists" />
+
+
+  // getInitialState: function() {
+  //   return {
+  //     windowWidth: window.innerWidth
+  //   };
+  // },
+
+  // handleResize: function(e) {
+  //   this.setState({windowWidth: window.innerWidth});
+  //   console.log("windowWidth=",this.state.windowWidth);
+  //   console.log("maskHeight=",document.getElementById('mask').Width);
+  // },
+
+  //componentDidMount: function() {
+    //window.addEventListener('resize', this.handleResize);
+  //},
+
+  //componentWillUnmount: function() {
+    //window.removeEventListener('resize', this.handleResize);
+  //},
+
+  // render: function() {
+  //   var style = {visibility:'hidden'};
+  //   return <div style={style}>Current window width: {this.state.windowWidth}</div>;
+  // }
