@@ -1,7 +1,7 @@
 //Add new disc on connect4's grid
 var C4Fct = {
   
-  urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
+  //urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
   //urlConnect4MP : "http://www.felixdebon.fr", //prod
 
   arrayToString: function(array){

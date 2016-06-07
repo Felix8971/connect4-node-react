@@ -10,7 +10,7 @@ You can also play against an artificial intelligence with 5 differents difficult
 1. `cd` into your project directory.
 2. run `npm install`  (nodejs packages installation)
 3. run `gulp` (creation of lib.min.js and main.min.css)
-4. run `npm run build` (to create app.js from main.js and his dependancies)
+4. run `npm run build` (to create app.js from main.js and his dependencies)
 5. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
 6. visit <http://localhost:8080/>
 

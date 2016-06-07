@@ -156,10 +156,10 @@ io.on('connection', function (socket){
   players[socket.id] = { 
     sid:socket.id,
     pseudo:null,
-    dispo:false,
-    turnId: null,
-    opponent_sid:null,
-    img:'human.png'
+    dispo:false,//true if user is available for a new game
+    turnId: null,//user turn id, can be 1 or 2 (or null before and after the game) 
+    opponent_sid:null,//socket.id of the opponent
+    img:'human.png'//avatar
   };
   
   socket.emit('players',players);
@@ -187,8 +187,7 @@ io.on('connection', function (socket){
       clients[osid].emit('opponentResign');
     }
     deletePlayer(socket.id);
-
-    //prevenir adversaire !!!!!
+    //prevenir adversaire !
     //io.sockets.emit('players', players);//send to all clients
   });
 
@@ -201,8 +200,6 @@ io.on('connection', function (socket){
       clients[osid].emit('opponentResign');
     }
     inactivatePlayer(socket.id);
-    //console.log('players=',players);
-    //io.sockets.emit('players', players);//send to all clients when a client leave the 'Human mode'
   });  
 
   //if a user leave the game we remove him from users list and we inform other clients
