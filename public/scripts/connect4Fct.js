@@ -1,4 +1,4 @@
-//Add new disc on connect4's grid
+
 var C4Fct = {
   
   //urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
@@ -43,7 +43,7 @@ var C4Fct = {
 
   emptyGrid : function(){
     //can contain 3 differents value: 
-    // 0 : for empty
+    // 0 : for empty emplacement
     // 1 : for red disc
     // 2 : for blue disk
     return [//game map
@@ -59,8 +59,7 @@ var C4Fct = {
 
   game: function(level){
     this.pseudo = null;
-    this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
-    //we define turn client side only in the case of a game against computer 
+    this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by his code, 1 always start)
     this.lastMove = {};
     this.opponentType = "robot"; //can be "robot" ou "human"
     this.level = level || "normal";
@@ -124,25 +123,6 @@ var C4Fct = {
     "hard":     "terminator.png",
     "very hard":"hal.png",
   },
-
-
-  // computerMove: function(_this){
-  //   var game = _this.state.game;
-  //   var pos = C4Fct.arrayToString(game.position);
-  //   $.ajax({
-  //     url: game.urlSolver,
-  //     data:{pos:pos},
-  //     dataType: 'json',
-  //     cache: false,
-  //     success: function(data) {
-  //       console.log("data with jquery:",data);
-  //     }.bind(_this),
-  //     error: function(xhr, status, err) {
-  //       console.error(_this.props.urlSolver, status, err.toString());
-  //     }.bind(_this)
-  //   });
-
-  // },
 
   /**
     * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
@@ -260,7 +240,7 @@ var C4Fct = {
     }
     
     //use to verify if we have 4 chips horizontally aligned
-    //if we pass optionCheck === true the 'aligned' grid will be update 
+    //if so win the 'aligned' grid will be update 
     var test_alignment_EW = function(game, lastMove){
       var nbAlignedDisc = 1;
       game.aligned[lastMove.col][lastMove.line] = true;
@@ -327,8 +307,7 @@ var C4Fct = {
             break;
           }
         }
-      }  
-
+      } 
       //toward South/Est 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col + k < 7 ) && (lastMove.line + k < 6 ) ){
@@ -358,7 +337,6 @@ var C4Fct = {
           }
         }
       }        
-
       //toward South/West 
       for(var k=1;k<=3;k++){
         if ( (lastMove.col - k >= 0 ) && (lastMove.line + k < 6 ) ){
@@ -387,22 +365,6 @@ var C4Fct = {
 
   },
 
-
-  // getData: function(urlSolver, callback){
-  //   var options = { method: 'GET' };
-  //   fetch(urlSolver, options).then(function(res) {
-  //     return res.json();
-  //   })
-  //   .then(function(data){
-  //     console.log("data=",data);
-  //     callback(data);        
-  //   })
-  //   .catch(function(error) {
-  //     console.log('There has been a problem with your fetch operation 3: ' + error.message);
-  //   }); 
-  // },
-
-
   // getPlayers: function(that, callback){
   //   $.ajax({
   //     url: "http://www.felixdebon.fr/connect4/getplayers",
@@ -419,7 +381,7 @@ var C4Fct = {
   //   });
   // },
 
-  getPlayers: function(that, callback){
+  getPlayers: function(that, callback){//doesn't work in production !(I replaced it by a websocket)
     var options = { method: 'GET' };
     fetch("www.felixdebon.fr/connect4/getplayers", options).then(function(res) {
       return res.json();
