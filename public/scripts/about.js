@@ -13,7 +13,7 @@ module.exports = React.createClass({
            I developed it in order to practice (and learn) ReactJS. 
           <h2 className="sub-title">Rules</h2>
           Connect four (also called Gravitrips in Soviet Union) is a two players strategy game. 
-          Each player drops alternatively a chip of his colors. The first player to align four chips wins.
+          Each player drops alternatively a chip of his colors into a grid. The first player to align four chips wins.
           
           <h2 className="sub-title">Extra features on this website</h2>
           You can play against an artificial intelligence with 5 differents difficulty levels.

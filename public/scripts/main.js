@@ -5,7 +5,7 @@ var socket = io();
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
-var debug = true;
+var debug = false;
 
 var MenuBar = React.createClass({
     getInitialState: function(){
@@ -105,26 +105,27 @@ var Mask = React.createClass({
       if ( this.props.game.turn === 1 ){
         loader = true;
       }
-    }
-    if ( this.props.game.opponentType === 'human' ){
+      var msg = "Your opponent is thinking. Please wait..."; 
+
+    }else if ( this.props.game.opponentType === 'human' ){
       if ( this.props.game.turn != this.props.game.me.turnId ){
         loader = true;
       }
+      if ( typeof this.props.game.opponent.sid != "undefined" ){
+        var msg = "Your opponent is thinking. Please wait...";    
+      }else{
+        var msg = "Waiting for opponent...";  
+      }
     }
-
     return (
+      //img id="loader" src="images/loading_apple.gif" alt="Please wait..."/>
       <div id="mask">
         
         { this.props.game.turn === null && this.props.game.opponentType === 'robot' ?  <div id="playAgain" onClick={that.playAgain}>Click to play again</div>  : null }
-        { loader ?  <div id="wait"><img id="loader" src="images/loading_apple.gif" alt="Please wait..."/></div> : null }
+        { loader ? <div id="wait"  className='slowBlink'>{msg}</div> : null }
 
         {columns}
-        <NextTurnDisplay 
-          turn={this.props.game.turn} 
-          level={this.props.game.level} 
-          winner={this.props.game.winner}
-          opponentType = {this.props.game.opponentType}
-          classNames={this.props.game.classNames} />      
+    
       </div>
     );    
     
@@ -153,19 +154,39 @@ var ColumnMask = React.createClass({
 });
 
 //{turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
+//{ this.props.opponentType === 'robot' ? <div id="difficulty">Difficulty: {this.props.level}</div> : null}
 var NextTurnDisplay = React.createClass({
+  
   render: function() {
     var classNames = ["smallNoDisc","smallRedDisc","smallBlueDisc"];
-    var turn = this.props.turn;
+    var turn = this.props.game.turn;
+    //console.log("opponentType=",this.props.game.opponentType);
+   
+    switch(this.props.game.opponentType) {
+      case 'robot':   
+        var myTurnId = 2;      
+        var myPseudo = 'You';
+        var opponentPseudo = C4Fct.infoFromLevel[this.props.game.level].img.split('.')[0];           
+        break;
+      case 'human':   
+        var myTurnId = this.props.game.me.turnId;
+        var myPseudo = this.props.game.pseudo; 
+        var opponentPseudo = this.props.game.opponent.pseudo;
+        break;
+      default:
+          alert("error");
+    }     
     return (
-      <div>
-        <div id="next-turn" >Next turn: 
-          <div className={classNames[turn]}></div>
-        </div>
-        { this.props.opponentType === 'robot' ? <div id="difficulty">Difficulty: {this.props.level}</div> : null}
-        <div id="winner">Winner: 
-          <div className={classNames[this.props.winner]}></div>
-        </div>
+      <div id="nextTurnDisplay">
+        <div className="pseudos">
+          <div id="me" >{myPseudo}
+            <div className={classNames[myTurnId]}></div>
+          </div>
+          |
+          <div id="opponent">{opponentPseudo} 
+            <div className={classNames[3-myTurnId]}></div>
+          </div>
+        </div>         
       </div>      
     );
   }
@@ -215,7 +236,7 @@ var ColumnGrid = React.createClass({
       var style = 'square';
 
       if ( lastCol === col && lastLine ===  line && blink ){ 
-        style += ' clignoter';
+        style += ' fastBlink';
       }
 
       return (
@@ -257,12 +278,12 @@ var SettingZone = React.createClass({
         case 'robot':       
          
           var levelRows = [];
-          for (var level in C4Fct.getRankToPLayFromLevelAndNbrChoices) {
-             var img = "images/" + C4Fct.imageFromLevel[level];
+          for (var level in C4Fct.infoFromLevel) {
+             var img = "images/" + C4Fct.infoFromLevel[level].img;
              var className = this.props.game.level === level ? 'level-block selected' : 'level-block';
              levelRows.push( 
-              <div key={level} className={className} id={level} onClick={this.handleClick}>
-                <div className="robotFrame">
+              <div key={level} className={className} id={level} onClick={this.handleClick} title={C4Fct.infoFromLevel[level].speech}>
+                <div className="robotFrame" >
                   <img className="level-img" src={img}/>
                 </div>
                 <div className="info">{level}</div>
@@ -522,6 +543,10 @@ var Connect4 = React.createClass({
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
           console.log('pseudo:',pseudo);
           if ( pseudo && pseudo.trim().length > 0 ){
+
+            if ( pseudo.trim().length > 15 ){
+                alert("15 characters max please!");
+            }else{
             //that.state.game.pseudo = pseudo; 
             //C4Fct.getPlayers(that, function(players){
               //console.log('players===>',players);
@@ -537,7 +562,8 @@ var Connect4 = React.createClass({
 
               }else{
                 alert("This pseudo is already used, choose a new one !");
-              }            
+              }     
+            }       
             //});
           }else{//return to robot mode
             that.setState({ game : new C4Fct.game(that.state.game.level) }, function(){
@@ -741,6 +767,7 @@ var Connect4 = React.createClass({
               game = {this.state.game} 
               onClickDifficulty = {this.handleChangeDifficulty}
               onClickOpponentType = {this.handleChangeOpponentType} /> 
+            <NextTurnDisplay game = {this.state.game} />    
             <Mask game={this.state.game} onUserClick={this.handleUserClick} />
             <Grid game={this.state.game} />
         </div>

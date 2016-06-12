@@ -20,8 +20,8 @@ var C4Fct = {
     
   // Chose randomly an element in an array and return it 
   getRandomElementInArray : function (array){
-    var n = array.length;
-    var index = this.getRandomIntInclusive(0,n-1);
+    //var n = array.length;
+    var index = this.getRandomIntInclusive(0,array.length-1);
     return array[index];
   },
 
@@ -59,6 +59,7 @@ var C4Fct = {
 
   game: function(level){
     this.pseudo = null;
+    this.opponentPseudo = null;
     this.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by his code, 1 always start)
     this.lastMove = {};
     this.opponentType = "robot"; //can be "robot" ou "human"
@@ -82,7 +83,7 @@ var C4Fct = {
   **/
   getArrayStat: function(array){
     //var array = [2,2,3,15,6,100,100];
-    //console.log('array:',array);
+    console.log('array:',array);
     var n = array.length;
 
     var stat = {};
@@ -99,7 +100,7 @@ var C4Fct = {
     }
     //console.log('stat:',stat);
     var statSorted =_.sortBy(stat, 'value').reverse();
-    //console.log('statSorted:',statSorted);
+    console.log('statSorted:',statSorted);
     return statSorted;
   },
 
@@ -107,21 +108,35 @@ var C4Fct = {
    *  Dans le tableau retourné par C4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
    *  en fonction du niveau de jeu et du nombre de choix possibles
   **/  
-  getRankToPLayFromLevelAndNbrChoices : {
-    "very easy":[0,1,2,3,4,5,6],//nb choix 1 => 0, nb choix 2 => 1, nb choix 3 => 2, 
-    "easy":     [0,0,1,2,3,4,5],
-    "normal":   [0,0,0,1,2,3,4],        
-    "hard":     [0,0,0,0,1,2,3],
-    "very hard":[0,0,0,0,0,0,0],   
-  },
+  // getRankToPLayFromLevelAndNbrChoices : {
+  //   "easy":     [0,0,1,2,3,4,5],
+  //   "normal":   [0,0,0,1,2,3,4],        
+  //   "hard":     [0,0,0,0,1,2,3],
+  //   "very hard":[0,0,0,0,0,0,0],   
+  // },
 
 
-  imageFromLevel : {
-    "very easy":"very_easy.png",//nb choix 1 => 0, nb choix 2 => 1, nb choix 3 => 2, 
-    "easy":     "r2d2.png",
-    "normal":   "6po.png",
-    "hard":     "terminator.png",
-    "very hard":"hal.png",
+  infoFromLevel : {
+    "easy": { 
+      img:"R2D2.png",
+      speech:"bip bip...",
+      rankToPLayFromLevelAndNbrChoices:[0,0,1,2,3,4,5]
+    },
+    "normal":{
+      img:"6PO.png",
+      speech:"Your chances of survival are 3720 to 1...",
+      rankToPLayFromLevelAndNbrChoices:[0,0,0,1,2,3,4]  
+    } ,
+    "hard":{ 
+      img:"Terminator.png",
+      speech:"Sarah Connor ?",
+      rankToPLayFromLevelAndNbrChoices:[0,0,0,0,1,2,3]
+    },
+    "very hard":{ 
+      img:"HAL9000.png", 
+      speech:"Dave, this conversation can serve no purpose anymore. Goodbye",//My mind is going... I can feel it
+      rankToPLayFromLevelAndNbrChoices:[0,0,0,0,0,0,0]   
+    },
   },
 
   /**
@@ -152,7 +167,7 @@ var C4Fct = {
       //console.log('n:'+ n+ ' stat:',stat);
       var columnPlayed;
       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-      var rank = C4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n-1];
+      var rank = C4Fct.infoFromLevel[game.level].rankToPLayFromLevelAndNbrChoices[n-1];
 
       //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
@@ -226,7 +241,7 @@ var C4Fct = {
   //   } 
   // },
 
-  //Check if the last move win (four pieces connected)
+  //Check if the last move win (i.e. at least four pieces connected)
   testWin: function(game, lastMove){//if optionCheck is true we record the aligned discs in game.aligned matrix
 
     var count = function(nbAlignedDisc, game){
@@ -240,7 +255,7 @@ var C4Fct = {
     }
     
     //use to verify if we have 4 chips horizontally aligned
-    //if so win the 'aligned' grid will be update 
+    //if so the 'aligned' grid will be update 
     var test_alignment_EW = function(game, lastMove){
       var nbAlignedDisc = 1;
       game.aligned[lastMove.col][lastMove.line] = true;

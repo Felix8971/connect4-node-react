@@ -3950,7 +3950,7 @@ module.exports = React.createClass({
           { className: "sub-title" },
           "Rules"
         ),
-        "Connect four (also called Gravitrips in Soviet Union) is a two players strategy game. Each player drops alternatively a chip of his colors. The first player to align four chips wins.",
+        "Connect four (also called Gravitrips in Soviet Union) is a two players strategy game. Each player drops alternatively a chip of his colors into a grid. The first player to align four chips wins.",
         React.createElement(
           "h2",
           { className: "sub-title" },
@@ -3988,7 +3988,7 @@ module.exports = React.createClass({
 });
 
 },{"react":36}],38:[function(require,module,exports){
-//Add new disc on connect4's grid
+
 var C4Fct = {
 
   //urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
@@ -4010,8 +4010,8 @@ var C4Fct = {
 
   // Chose randomly an element in an array and return it
   getRandomElementInArray: function (array) {
-    var n = array.length;
-    var index = this.getRandomIntInclusive(0, n - 1);
+    //var n = array.length;
+    var index = this.getRandomIntInclusive(0, array.length - 1);
     return array[index];
   },
 
@@ -4033,7 +4033,7 @@ var C4Fct = {
 
   emptyGrid: function () {
     //can contain 3 differents value:
-    // 0 : for empty
+    // 0 : for empty emplacement
     // 1 : for red disc
     // 2 : for blue disk
     return [//game map
@@ -4043,8 +4043,8 @@ var C4Fct = {
 
   game: function (level) {
     this.pseudo = null;
-    this.turn = 1 + Math.floor(2 * Math.random()); // 1 or 2 randomely (tells us who is going to play by is code)
-    //we define turn client side only in the case of a game against computer
+    this.opponentPseudo = null;
+    this.turn = 1 + Math.floor(2 * Math.random()); // 1 or 2 randomely (tells us who is going to play by his code, 1 always start)
     this.lastMove = {};
     this.opponentType = "robot"; //can be "robot" ou "human"
     this.level = level || "normal";
@@ -4067,7 +4067,7 @@ var C4Fct = {
   **/
   getArrayStat: function (array) {
     //var array = [2,2,3,15,6,100,100];
-    //console.log('array:',array);
+    console.log('array:', array);
     var n = array.length;
 
     var stat = {};
@@ -4085,7 +4085,7 @@ var C4Fct = {
     }
     //console.log('stat:',stat);
     var statSorted = _.sortBy(stat, 'value').reverse();
-    //console.log('statSorted:',statSorted);
+    console.log('statSorted:', statSorted);
     return statSorted;
   },
 
@@ -4093,39 +4093,35 @@ var C4Fct = {
    *  Dans le tableau retourné par C4Fct.getArrayStat() cet objet donne l'indice à choisir pour jouer   
    *  en fonction du niveau de jeu et du nombre de choix possibles
   **/
-  getRankToPLayFromLevelAndNbrChoices: {
-    "very easy": [0, 1, 2, 3, 4, 5, 6], //nb choix 1 => 0, nb choix 2 => 1, nb choix 3 => 2,
-    "easy": [0, 0, 1, 2, 3, 4, 5],
-    "normal": [0, 0, 0, 1, 2, 3, 4],
-    "hard": [0, 0, 0, 0, 1, 2, 3],
-    "very hard": [0, 0, 0, 0, 0, 0, 0]
-  },
-
-  imageFromLevel: {
-    "very easy": "very_easy.png", //nb choix 1 => 0, nb choix 2 => 1, nb choix 3 => 2,
-    "easy": "r2d2.png",
-    "normal": "6po.png",
-    "hard": "terminator.png",
-    "very hard": "hal.png"
-  },
-
-  // computerMove: function(_this){
-  //   var game = _this.state.game;
-  //   var pos = C4Fct.arrayToString(game.position);
-  //   $.ajax({
-  //     url: game.urlSolver,
-  //     data:{pos:pos},
-  //     dataType: 'json',
-  //     cache: false,
-  //     success: function(data) {
-  //       console.log("data with jquery:",data);
-  //     }.bind(_this),
-  //     error: function(xhr, status, err) {
-  //       console.error(_this.props.urlSolver, status, err.toString());
-  //     }.bind(_this)
-  //   });
-
+  // getRankToPLayFromLevelAndNbrChoices : {
+  //   "easy":     [0,0,1,2,3,4,5],
+  //   "normal":   [0,0,0,1,2,3,4],       
+  //   "hard":     [0,0,0,0,1,2,3],
+  //   "very hard":[0,0,0,0,0,0,0],  
   // },
+
+  infoFromLevel: {
+    "easy": {
+      img: "R2D2.png",
+      speech: "bip bip...",
+      rankToPLayFromLevelAndNbrChoices: [0, 0, 1, 2, 3, 4, 5]
+    },
+    "normal": {
+      img: "6PO.png",
+      speech: "Your chances of survival are 3720 to 1...",
+      rankToPLayFromLevelAndNbrChoices: [0, 0, 0, 1, 2, 3, 4]
+    },
+    "hard": {
+      img: "Terminator.png",
+      speech: "Sarah Connor ?",
+      rankToPLayFromLevelAndNbrChoices: [0, 0, 0, 0, 1, 2, 3]
+    },
+    "very hard": {
+      img: "HAL9000.png",
+      speech: "Dave, this conversation can serve no purpose anymore. Goodbye", //My mind is going... I can feel it
+      rankToPLayFromLevelAndNbrChoices: [0, 0, 0, 0, 0, 0, 0]
+    }
+  },
 
   /**
     * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
@@ -4155,7 +4151,7 @@ var C4Fct = {
       //console.log('n:'+ n+ ' stat:',stat);
       var columnPlayed;
       //donne l'incide du tableau stat à choisir pour jouer à ce nivaau là
-      var rank = C4Fct.getRankToPLayFromLevelAndNbrChoices[game.level][n - 1];
+      var rank = C4Fct.infoFromLevel[game.level].rankToPLayFromLevelAndNbrChoices[n - 1];
 
       //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
@@ -4228,7 +4224,7 @@ var C4Fct = {
   //   }
   // },
 
-  //Check if the last move win (four pieces connected)
+  //Check if the last move win (i.e. at least four pieces connected)
   testWin: function (game, lastMove) {
     //if optionCheck is true we record the aligned discs in game.aligned matrix
 
@@ -4244,7 +4240,7 @@ var C4Fct = {
     };
 
     //use to verify if we have 4 chips horizontally aligned
-    //if we pass optionCheck === true the 'aligned' grid will be update
+    //if so the 'aligned' grid will be update
     var test_alignment_EW = function (game, lastMove) {
       var nbAlignedDisc = 1;
       game.aligned[lastMove.col][lastMove.line] = true;
@@ -4312,7 +4308,6 @@ var C4Fct = {
           }
         }
       }
-
       //toward South/Est
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col + k < 7 && lastMove.line + k < 6) {
@@ -4342,7 +4337,6 @@ var C4Fct = {
           }
         }
       }
-
       //toward South/West
       for (var k = 1; k <= 3; k++) {
         if (lastMove.col - k >= 0 && lastMove.line + k < 6) {
@@ -4370,20 +4364,6 @@ var C4Fct = {
     }
   },
 
-  // getData: function(urlSolver, callback){
-  //   var options = { method: 'GET' };
-  //   fetch(urlSolver, options).then(function(res) {
-  //     return res.json();
-  //   })
-  //   .then(function(data){
-  //     console.log("data=",data);
-  //     callback(data);       
-  //   })
-  //   .catch(function(error) {
-  //     console.log('There has been a problem with your fetch operation 3: ' + error.message);
-  //   });
-  // },
-
   // getPlayers: function(that, callback){
   //   $.ajax({
   //     url: "http://www.felixdebon.fr/connect4/getplayers",
@@ -4401,6 +4381,7 @@ var C4Fct = {
   // },
 
   getPlayers: function (that, callback) {
+    //doesn't work in production !(I replaced it by a websocket)
     var options = { method: 'GET' };
     fetch("www.felixdebon.fr/connect4/getplayers", options).then(function (res) {
       return res.json();
@@ -4466,7 +4447,7 @@ var socket = io();
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
-var debug = true;
+var debug = false;
 
 var MenuBar = React.createClass({
   displayName: 'MenuBar',
@@ -4593,33 +4574,34 @@ var Mask = React.createClass({
       if (this.props.game.turn === 1) {
         loader = true;
       }
-    }
-    if (this.props.game.opponentType === 'human') {
+      var msg = "Your opponent is thinking. Please wait...";
+    } else if (this.props.game.opponentType === 'human') {
       if (this.props.game.turn != this.props.game.me.turnId) {
         loader = true;
       }
+      if (typeof this.props.game.opponent.sid != "undefined") {
+        var msg = "Your opponent is thinking. Please wait...";
+      } else {
+        var msg = "Waiting for opponent...";
+      }
     }
-
-    return React.createElement(
-      'div',
-      { id: 'mask' },
-      this.props.game.turn === null && this.props.game.opponentType === 'robot' ? React.createElement(
+    return(
+      //img id="loader" src="images/loading_apple.gif" alt="Please wait..."/>
+      React.createElement(
         'div',
-        { id: 'playAgain', onClick: that.playAgain },
-        'Click to play again'
-      ) : null,
-      loader ? React.createElement(
-        'div',
-        { id: 'wait' },
-        React.createElement('img', { id: 'loader', src: 'images/loading_apple.gif', alt: 'Please wait...' })
-      ) : null,
-      columns,
-      React.createElement(NextTurnDisplay, {
-        turn: this.props.game.turn,
-        level: this.props.game.level,
-        winner: this.props.game.winner,
-        opponentType: this.props.game.opponentType,
-        classNames: this.props.game.classNames })
+        { id: 'mask' },
+        this.props.game.turn === null && this.props.game.opponentType === 'robot' ? React.createElement(
+          'div',
+          { id: 'playAgain', onClick: that.playAgain },
+          'Click to play again'
+        ) : null,
+        loader ? React.createElement(
+          'div',
+          { id: 'wait', className: 'slowBlink' },
+          msg
+        ) : null,
+        columns
+      )
     );
   }
 });
@@ -4650,32 +4632,49 @@ var ColumnMask = React.createClass({
 });
 
 //{turn === 1 ? <img src="images/ajax-loader.gif" className="wait" alt="Please wait..."/> : <div className={classNames[turn]}></div>}
+//{ this.props.opponentType === 'robot' ? <div id="difficulty">Difficulty: {this.props.level}</div> : null}
 var NextTurnDisplay = React.createClass({
   displayName: 'NextTurnDisplay',
 
+
   render: function () {
     var classNames = ["smallNoDisc", "smallRedDisc", "smallBlueDisc"];
-    var turn = this.props.turn;
+    var turn = this.props.game.turn;
+    //console.log("opponentType=",this.props.game.opponentType);
+
+    switch (this.props.game.opponentType) {
+      case 'robot':
+        var myTurnId = 2;
+        var myPseudo = 'You';
+        var opponentPseudo = C4Fct.infoFromLevel[this.props.game.level].img.split('.')[0];
+        break;
+      case 'human':
+        var myTurnId = this.props.game.me.turnId;
+        var myPseudo = this.props.game.pseudo;
+        var opponentPseudo = this.props.game.opponent.pseudo;
+        break;
+      default:
+        alert("error");
+    }
     return React.createElement(
       'div',
-      null,
+      { id: 'nextTurnDisplay' },
       React.createElement(
         'div',
-        { id: 'next-turn' },
-        'Next turn:',
-        React.createElement('div', { className: classNames[turn] })
-      ),
-      this.props.opponentType === 'robot' ? React.createElement(
-        'div',
-        { id: 'difficulty' },
-        'Difficulty: ',
-        this.props.level
-      ) : null,
-      React.createElement(
-        'div',
-        { id: 'winner' },
-        'Winner:',
-        React.createElement('div', { className: classNames[this.props.winner] })
+        { className: 'pseudos' },
+        React.createElement(
+          'div',
+          { id: 'me' },
+          myPseudo,
+          React.createElement('div', { className: classNames[myTurnId] })
+        ),
+        '|',
+        React.createElement(
+          'div',
+          { id: 'opponent' },
+          opponentPseudo,
+          React.createElement('div', { className: classNames[3 - myTurnId] })
+        )
       )
     );
   }
@@ -4729,7 +4728,7 @@ var ColumnGrid = React.createClass({
       var style = 'square';
 
       if (lastCol === col && lastLine === line && blink) {
-        style += ' clignoter';
+        style += ' fastBlink';
       }
 
       return React.createElement(
@@ -4776,12 +4775,12 @@ var SettingZone = React.createClass({
       case 'robot':
 
         var levelRows = [];
-        for (var level in C4Fct.getRankToPLayFromLevelAndNbrChoices) {
-          var img = "images/" + C4Fct.imageFromLevel[level];
+        for (var level in C4Fct.infoFromLevel) {
+          var img = "images/" + C4Fct.infoFromLevel[level].img;
           var className = this.props.game.level === level ? 'level-block selected' : 'level-block';
           levelRows.push(React.createElement(
             'div',
-            { key: level, className: className, id: level, onClick: this.handleClick },
+            { key: level, className: className, id: level, onClick: this.handleClick, title: C4Fct.infoFromLevel[level].speech },
             React.createElement(
               'div',
               { className: 'robotFrame' },
@@ -5065,21 +5064,26 @@ var Connect4 = React.createClass({
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
           console.log('pseudo:', pseudo);
           if (pseudo && pseudo.trim().length > 0) {
-            //that.state.game.pseudo = pseudo;
-            //C4Fct.getPlayers(that, function(players){
-            //console.log('players===>',players);
-            if (!C4Fct.isPseudoUsed(pseudo, that.state.game.players)) {
-              that.state.game.pseudo = pseudo;
-              //console.log("pseudo valid:",pseudo);        
-              that.updatePseudo(pseudo);
-              //that.updatePlayers(players);
-              //that.state.game.players = players;
-              that.forceUpdate();
-              //ne fonctinnera pas si le user est deconnécté de la socket
-              socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
+
+            if (pseudo.trim().length > 15) {
+              alert("15 characters max please!");
             } else {
-                alert("This pseudo is already used, choose a new one !");
-              }
+              //that.state.game.pseudo = pseudo;
+              //C4Fct.getPlayers(that, function(players){
+              //console.log('players===>',players);
+              if (!C4Fct.isPseudoUsed(pseudo, that.state.game.players)) {
+                that.state.game.pseudo = pseudo;
+                //console.log("pseudo valid:",pseudo);        
+                that.updatePseudo(pseudo);
+                //that.updatePlayers(players);
+                //that.state.game.players = players;
+                that.forceUpdate();
+                //ne fonctinnera pas si le user est deconnécté de la socket
+                socket.emit('addPlayer', pseudo); //we ask the server to add a new user to the users list
+              } else {
+                  alert("This pseudo is already used, choose a new one !");
+                }
+            }
             //});
           } else {
               //return to robot mode
@@ -5287,6 +5291,7 @@ var Connect4 = React.createClass({
           game: this.state.game,
           onClickDifficulty: this.handleChangeDifficulty,
           onClickOpponentType: this.handleChangeOpponentType }),
+        React.createElement(NextTurnDisplay, { game: this.state.game }),
         React.createElement(Mask, { game: this.state.game, onUserClick: this.handleUserClick }),
         React.createElement(Grid, { game: this.state.game })
       )
