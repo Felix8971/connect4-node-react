@@ -76,7 +76,7 @@ var C4Fct = {
     this.grid = C4Fct.emptyGrid();//game matrix map
     this.aligned = C4Fct.emptyGrid();//tells where to display the check symbol when 4 discs or more are aligned
 
-    this.messages = [{pseudo:"toto",txt:"bla bla bla"},{pseudo:"Guest_132548",txt:"coucou ca va ?"}];//chat messages
+    this.messages = [];//chat messages
     this.inputValue = '';
   },
 
@@ -86,7 +86,7 @@ var C4Fct = {
   **/
   getArrayStat: function(array){
     //var array = [2,2,3,15,6,100,100];
-    console.log('array:',array);
+    //console.log('array:',array);
     var n = array.length;
 
     var stat = {};
@@ -103,7 +103,7 @@ var C4Fct = {
     }
     //console.log('stat:',stat);
     var statSorted =_.sortBy(stat, 'value').reverse();
-    console.log('statSorted:',statSorted);
+    //console.log('statSorted:',statSorted);
     return statSorted;
   },
 

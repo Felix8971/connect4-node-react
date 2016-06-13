@@ -582,7 +582,7 @@ var Connect4 = React.createClass({
           socket.emit('getPlayers');
           var pseudo = prompt("Choose a pseudo please",'Guest_'+C4Fct.getRandomIntInclusive(1,999999));
           //If the pseudo is not already used by another user we send it to the server otherwise we ask the pseudo again
-          console.log('pseudo:',pseudo);
+          //console.log('pseudo:',pseudo);
           if ( pseudo && pseudo.trim().length > 0 ){
 
             if ( pseudo.trim().length > 15 ){
