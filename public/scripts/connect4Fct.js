@@ -75,6 +75,9 @@ var C4Fct = {
     this.position = [];//list of column's numbers successively played, first column is 1
     this.grid = C4Fct.emptyGrid();//game matrix map
     this.aligned = C4Fct.emptyGrid();//tells where to display the check symbol when 4 discs or more are aligned
+
+    this.messages = [{pseudo:"toto",txt:"bla bla bla"},{pseudo:"Guest_132548",txt:"coucou ca va ?"}];//chat messages
+    this.inputValue = '';
   },
 
   /**

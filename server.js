@@ -60,7 +60,7 @@ app.get('/connect4/getplayers', function(req, res) {
 
 //try to find 2 users ready for a game, if these players are found we start a new game 
 var try2LaunchGame = function(){
-  console.log('try2LaunchGame'); 
+  //console.log('try2LaunchGame'); 
   for ( var prop1 in players) {
     var player1 = players[prop1];
     //console.log('prop::',prop);
@@ -203,6 +203,16 @@ io.on('connection', function (socket){
       clients[osid].emit('addDisc',col);
     } 
   });  
+
+  socket.on('sendMessage', function(msg){
+    var osid = players[socket.id].opponent_sid;
+    //if defined we send the message to his opponente 
+    if ( osid ){//&& msg.trim().length > 0
+      //console.log('newMessage:',msg);
+      clients[osid].emit('newMessage',msg);
+    } 
+  });  
+
 
 });
 

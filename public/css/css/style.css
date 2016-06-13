@@ -85,7 +85,6 @@ html, body{
   width:50px;
 }
 
-
 #menuBar{
     list-style:none;
     display: inline-block;
@@ -113,8 +112,6 @@ html, body{
   color:#fff;
   background-color:#0753B1;
 }
-
-
 
 #container{
   width:100%;
@@ -212,6 +209,58 @@ html, body{
   border-radius:5px;
 }
 
+#chat-zone{
+  position: relative;
+  display: block;
+  height:35vw;
+  padding:0;    
+  border-radius:5px;  
+  margin-bottom: 15px;
+}
+}
+
+#chat{
+  position: relative;
+  display: block;
+  height:33vw;
+  padding:0;    
+  overflow-y: scroll;
+  border: 1px solid #AFAFC5;
+  background-color: white;
+  margin-bottom: 3px;
+}
+
+
+.center{
+  text-align: center;
+}
+
+.txt{
+  color: blue;
+}
+
+#chat-input{
+  border: 1px solid #AFAFC5;
+  display: inline-block;
+  width: 69%;
+  height: 2vw;
+}
+}
+
+#send-msg{
+  display: inline-block;
+  border:0;
+  width: 29%;
+  height: 2vw;
+  cursor:pointer;
+  color: #fff;
+  background-color: #0753B1;
+}
+
+
+#send-msg:hover{
+  background-color:#0975FA;
+}
 
 .robots-list{
   display: block;
@@ -586,6 +635,14 @@ label.css-label {
   .title {
     font-size:1.2em;
   }
+
+  #send-msg{
+    width: 28%;
+  }
+
+  #chat-input{
+    width:68%;
+  }
 }
 
 @media only screen and (max-width: 460px) {
@@ -641,6 +698,13 @@ label.css-label {
     width: 100%;
   }
 
+  #chat-input, #send-msg {
+    height: 8vw;
+  }
+
+  #chat-zone {
+    margin-bottom: 40px;
+  }
 }
 
 /*border: 2px solid lime;*/

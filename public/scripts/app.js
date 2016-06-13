@@ -4059,6 +4059,9 @@ var C4Fct = {
     this.position = []; //list of column's numbers successively played, first column is 1
     this.grid = C4Fct.emptyGrid(); //game matrix map
     this.aligned = C4Fct.emptyGrid(); //tells where to display the check symbol when 4 discs or more are aligned
+
+    this.messages = [{ pseudo: "toto", txt: "bla bla bla" }, { pseudo: "Guest_132548", txt: "coucou ca va ?" }]; //chat messages
+    this.inputValue = '';
   },
 
   /**
@@ -4568,16 +4571,16 @@ var Mask = React.createClass({
       );
     });
 
-    var loader = false;
+    var showMsg = false;
 
     if (this.props.game.opponentType === 'robot') {
       if (this.props.game.turn === 1) {
-        loader = true;
+        showMsg = true;
       }
       var msg = "Your opponent is thinking. Please wait...";
     } else if (this.props.game.opponentType === 'human') {
       if (this.props.game.turn != this.props.game.me.turnId) {
-        loader = true;
+        showMsg = true;
       }
       if (typeof this.props.game.opponent.sid != "undefined") {
         var msg = "Your opponent is thinking. Please wait...";
@@ -4585,6 +4588,11 @@ var Mask = React.createClass({
         var msg = "Waiting for opponent...";
       }
     }
+    //if there is a winner we hide the message
+    if (this.props.game.winner) {
+      showMsg = false;
+    }
+
     return(
       //img id="loader" src="images/loading_apple.gif" alt="Please wait..."/>
       React.createElement(
@@ -4595,7 +4603,7 @@ var Mask = React.createClass({
           { id: 'playAgain', onClick: that.playAgain },
           'Click to play again'
         ) : null,
-        loader ? React.createElement(
+        showMsg ? React.createElement(
           'div',
           { id: 'wait', className: 'slowBlink' },
           msg
@@ -4759,12 +4767,79 @@ var Loader = React.createClass({
   }
 });
 
+var Message = React.createClass({
+  displayName: 'Message',
+
+  render() {
+    return React.createElement(
+      'div',
+      { className: 'message' },
+      React.createElement(
+        'strong',
+        null,
+        this.props.pseudo,
+        ': '
+      ),
+      React.createElement(
+        'span',
+        { className: 'txt' },
+        ' ' + this.props.txt
+      )
+    );
+  }
+});
+
+var MessageList = React.createClass({
+  displayName: 'MessageList',
+
+  render() {
+    //console.log('opponent_sid=',this.props.opponent_sid);
+    if (typeof this.props.opponent_sid != "undefined") {
+
+      return React.createElement(
+        'div',
+        { className: 'messages' },
+        React.createElement(
+          'h2',
+          { className: 'center' },
+          ' -------- CHAT -------- '
+        ),
+        this.props.messages.map((message, i) => {
+          return React.createElement(Message, {
+            key: i,
+            pseudo: message.pseudo,
+            txt: message.txt
+          });
+        })
+      );
+    } else {
+      return null;
+    }
+  }
+});
+
 var SettingZone = React.createClass({
   displayName: 'SettingZone',
 
   handleClick: function (event) {
     //console.log(event.currentTarget.id);
     this.props.onClickDifficulty(event.currentTarget.id);
+  },
+
+  changeHandler: function (event) {
+    this.props.updateInputValue(event.target.value);
+    //this.setState({ text : e.target.value });
+  },
+
+  handleSendMsg: function (event) {
+    //console.log('id=',event.currentTarget.id);
+    //console.log('value=',document.getElementById('chat-input').value);
+    var message = {
+      pseudo: this.props.game.pseudo,
+      txt: this.props.game.inputValue //document.getElementById('chat-input').value
+    };
+    this.props.onMessageSubmit(message);
+    document.getElementById('chat-input').value = '';
   },
 
   render: function () {
@@ -4822,60 +4897,6 @@ var SettingZone = React.createClass({
 
       case 'human':
 
-        //var players = this.props.game.players;
-        var playerRows = [];
-        var classNames = ["smallNoDisc", "smallRedDisc", "smallBlueDisc"];
-
-        // var style = '';
-
-        // //C4Fct.displayPlayers(players);
-        // //<img className="player-img" src={"images/" + player.img}/>
-        // for ( var prop in players) {
-        //    console.log(players[prop]);
-        //    if ( players[prop].pseudo ){
-        //     var player = players[prop];
-
-        //     var style;
-        //     if ( this.props.game.opponent === player.pseudo ){
-        //       style = classNames[3-this.props.game.myTurnId];
-        //     }else{
-        //       style = "smallNoDisc";
-        //     }
-
-        //      var className = this.props.game.opponent === player.pseudo ? 'player-block selected' : 'player-block';
-        //      if ( player.pseudo != this.props.game.pseudo ){
-        //        playerRows.push(
-        //         <div key={player.sid} className={className} id={player.sid} >
-        //           <div className="discFrame">
-        //             <div className={style}></div>
-        //           </div>
-        //           <div className="pseudo">{player.pseudo}</div>
-        //         </div>
-        //       );
-        //     }
-        //   }
-        // }
-        var opponent = this.props.game.opponent;
-        var style;
-
-        if (typeof opponent.sid != "undefined") {
-          style = classNames[3 - this.props.game.me.turnId];
-          playerRows.push(React.createElement(
-            'div',
-            { key: opponent.sid, className: className, id: opponent.sid },
-            React.createElement(
-              'div',
-              { className: 'discFrame' },
-              React.createElement('div', { className: style })
-            ),
-            React.createElement(
-              'div',
-              { className: 'pseudo' },
-              opponent.pseudo
-            )
-          ));
-        }
-
         return React.createElement(
           'div',
           { id: 'settingZone' },
@@ -4883,11 +4904,17 @@ var SettingZone = React.createClass({
           React.createElement('br', null),
           React.createElement(
             'div',
-            { className: 'players-list' },
-            playerRows.length > 0 ? playerRows : React.createElement(
+            { id: 'chat-zone' },
+            React.createElement(
               'div',
-              { id: 'nobody' },
-              'Waiting for opponent...'
+              { id: 'chat' },
+              React.createElement(MessageList, { messages: this.props.game.messages, opponent_sid: this.props.game.me.opponent_sid })
+            ),
+            React.createElement(
+              'form',
+              null,
+              React.createElement('input', { id: 'chat-input', value: this.props.game.inputValue, onChange: this.changeHandler }),
+              React.createElement('input', { id: 'send-msg', value: 'Send', type: 'button', onClick: this.handleSendMsg })
             )
           )
         );
@@ -5021,6 +5048,17 @@ var Connect4 = React.createClass({
       self.state.game.turn = self.state.game.me.turnId;
       self.forceUpdate();
     });
+
+    socket.on('newMessage', function (msg) {
+      //console.log('newMessage:',msg)
+      self.state.game.messages.push(msg);
+      //forceUpdate + scroll bottom on chat windows
+      self.forceUpdate(function () {
+        //var chat = document.getElementById("chat");
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+        //document.getElementById("chat").scrollTo(0,document.getElementById("chat").scrollHeight);   
+      });
+    });
   },
 
   getInitialState: function () {
@@ -5032,6 +5070,18 @@ var Connect4 = React.createClass({
 
   handleChangeDifficulty: function (value) {
     this.state.game.level = value;
+    this.forceUpdate();
+  },
+
+  handleOnMessageSubmit: function (msg) {
+    this.state.game.messages.push(msg);
+    this.state.game.inputValue = '';
+    this.forceUpdate();
+    socket.emit('sendMessage', msg);
+  },
+
+  updateInputValue: function (value) {
+    this.state.game.inputValue = value;
     this.forceUpdate();
   },
 
@@ -5290,6 +5340,8 @@ var Connect4 = React.createClass({
         React.createElement(SettingZone, {
           game: this.state.game,
           onClickDifficulty: this.handleChangeDifficulty,
+          onMessageSubmit: this.handleOnMessageSubmit,
+          updateInputValue: this.updateInputValue,
           onClickOpponentType: this.handleChangeOpponentType }),
         React.createElement(NextTurnDisplay, { game: this.state.game }),
         React.createElement(Mask, { game: this.state.game, onUserClick: this.handleUserClick }),
