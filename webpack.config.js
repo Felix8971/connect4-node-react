@@ -7,7 +7,6 @@ module.exports = {
   entry: {
     index: [
       pathJs+"main.js",
-      //'./public/css/css/style.css',
     ],
 
   },
@@ -17,7 +16,7 @@ module.exports = {
     filename: 'bundle.js'
   },
 
-  // Resolve the `./src` directory so we can avoid writing ../../styles/base.css
+  // Resolve the `./public` directory so we can avoid writing ../../styles/base.css
   resolve: {
     modulesDirectories: ['node_modules', './public'],
     extensions: ['', '.js', '.jsx']

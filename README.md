@@ -16,7 +16,7 @@ You can also play against an artificial intelligence with 5 differents difficult
 
 ### Developpement 
 1. After code modification run `webpack --progress --colors` to compile js and css files with webpack 
-   Rem:(you can add -p or --production option if you want to minify all of that)
+   (you can add -p or --production option if you want to minify all of that)
 2. run `node server.js` or 'nodejs server.js` (for ubuntu)  ('npm run start' also works )
 
 
