@@ -4,7 +4,7 @@ var React = require('react');
 module.exports = React.createClass({
   render: function() {
       return (
-        <div className="content about" >
+        <div className="content about"> 
           <h1 className="title">ABOUT</h1>
           <div className="pg">
           

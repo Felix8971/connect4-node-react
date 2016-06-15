@@ -9,10 +9,15 @@ You can also play against an artificial intelligence with 5 differents difficult
 
 1. `cd` into your project directory.
 2. run `npm install`  (nodejs packages installation)
-3. run `gulp` (creation of lib.min.js and main.min.css)
-4. run `npm run build` (will create app.js from main.js and his dependencies - with Browserify and Babel -)
-5. run `node server.js` or 'nodejs server.js' (ubuntu)  ('npm run start' also works )
-6. visit <http://localhost:8080/> and enjoy !
+3. run `export PATH=$PATH:./node_modules/.bin` to make the webpack command work locally
+4. run `node server.js` or 'nodejs server.js` (for ubuntu)  ('npm run start' also works )
+5. visit <http://localhost:8080/> and enjoy !
+
+
+### Developpement 
+1. After code modification run `webpack --progress --colors` to compile js and css files with webpack 
+   Rem:(you can add -p or --production option if you want to minify all of that)
+2. run `node server.js` or 'nodejs server.js` (for ubuntu)  ('npm run start' also works )
 
 
 ### Artificial intelligence part
@@ -26,4 +31,8 @@ The sole purpose of this project is to practice (and learn) my skills in ReactJS
 
 ===
 
-![alt tag](http://felixdebon.com/connect4/public/images/connect4Image.png)
+![alt tag](http://felixdebon.com/connect4/public/images/connect4Image1.png)
+
+===
+
+![alt tag](http://felixdebon.com/connect4/public/images/connect4Image2.png)

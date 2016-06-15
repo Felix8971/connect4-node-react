@@ -5,17 +5,15 @@
   "main": "server.js",
   "dependencies": {
     "autoprefixer": "^6.3.6",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.3.0",
     "body-parser": "^1.4.3",
     "childish-process": "0.0.5",
     "express": "^4.4.5",
     "express-session": "^1.13.0",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-cssmin": "^0.1.7",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^1.5.3",
+    "extract-text-webpack-plugin": "^1.0.1",
     "mongodb": "^2.1.21",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
@@ -25,12 +23,21 @@
     "socket.io-express-session": "^0.1.3"
   },
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "babel-eslint": "^6.0.4",
+    "babel-loader": "^6.2.4",
+    "css-loader": "^0.23.1",
+    "cssnext": "^1.8.4",
+    "cssnext-loader": "^1.0.1",
+    "eslint-loader": "^1.3.0",
+    "file-loader": "^0.8.5",
+    "json-loader": "^0.5.4",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodejs server.js",
-    "build": "browserify -t [ babelify --presets [ react ] ] public/scripts/main.js -o public/scripts/app.js"
+    "start": "nodejs server.js"
   },
   "repository": {
     "type": "git",

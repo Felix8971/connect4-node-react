@@ -58,7 +58,7 @@ app.get('/connect4/getplayers', function(req, res) {
 // Socket.IO part used for multiplayer game
 
 
-//try to find 2 users ready for a game, if these players are found we start a new game 
+//try to find 2 users ready for a game, if these players are found we start a new game with them
 var try2LaunchGame = function(){
   //console.log('try2LaunchGame'); 
   for ( var prop1 in players) {
@@ -95,7 +95,7 @@ var try2LaunchGame = function(){
 }
 
 
-//If a user as an opponenet we delete this link on players object 
+//If a user has an opponent we delete this link on players object 
 //and tell that this opponent is available for a new game
 var removeOpponentsLink = function(sid){
   if ( typeof players[sid] != "undefined" ){
@@ -111,7 +111,7 @@ var removeOpponentsLink = function(sid){
   }  
 };
 
-//Called when a user is deconnected from the server (can be page closed or page refresh: the sockets link is lost) 
+//Called when a user is deconnected from the server (page closed or page refresh: the sockets link will be lost) 
 var deletePlayer = function(sid){
   removeOpponentsLink(sid);
   if ( typeof players[sid] != "undefined" ){
@@ -206,7 +206,7 @@ io.on('connection', function (socket){
 
   socket.on('sendMessage', function(msg){
     var osid = players[socket.id].opponent_sid;
-    //if defined we send the message to his opponente 
+    //if defined we send the message to the opponent of socket.id
     if ( osid ){//&& msg.trim().length > 0
       //console.log('newMessage:',msg);
       clients[osid].emit('newMessage',msg);

@@ -1,7 +1,14 @@
 
 //var React = require('react');
 
+import "../css/gh-fork-ribbon.min.css";//fork me on github bande
+import "../css/style.css";
+//require("../images/board.svg");
+//require("../css/css/font-awesome.min.css");
+//require("../css/css/gh-fork-ribbon.min.css");
+
 var socket = io();
+var React = require('react');
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
@@ -164,7 +171,7 @@ var NextTurnDisplay = React.createClass({
   
   render: function() {
     var classNames = ["smallNoDisc","smallRedDisc","smallBlueDisc"];
-    var turn = this.props.game.turn;
+    //var turn = this.props.game.turn;
     //console.log("opponentType=",this.props.game.opponentType);
    
     switch(this.props.game.opponentType) {
@@ -258,15 +265,15 @@ var ColumnGrid = React.createClass({
   }
 });
 
-var Loader = React.createClass({
-   render: function() {
-     return (
-      <div id="loading">
-        <img id="loading-image" src='images/loading_apple.gif' alt='Loading...'/>
-      </div>
-     )
-   }
-});
+// var Loader = React.createClass({
+//    render: function() {
+//      return (
+//       <div id="loading">
+//         <img id="loading-image" src='images/loading_apple.gif' alt='Loading...'/>
+//       </div>
+//      )
+//    }
+// });
 
 
 var Message = React.createClass({
@@ -308,22 +315,17 @@ var MessageList = React.createClass({
   }
 });
 
-
-
 var SettingZone = React.createClass({
+
   handleClick: function(event) {
-    //console.log(event.currentTarget.id);
     this.props.onClickDifficulty(event.currentTarget.id);
   },
 
-  changeHandler: function(event) {
+  changeValue: function(event) {
     this.props.updateInputValue(event.target.value);
-    //this.setState({ text : e.target.value });
   },
 
   handleSendMsg: function(event) {
-    //console.log('id=',event.currentTarget.id);
-    //console.log('value=',document.getElementById('chat-input').value);
     var message = {
         pseudo : this.props.game.pseudo,
         txt : this.props.game.inputValue//document.getElementById('chat-input').value
@@ -333,7 +335,6 @@ var SettingZone = React.createClass({
   },
 
   render: function() {
-    //console.log("opponentType=",this.props.game.opponentType);
     var that = this;
     switch(this.props.game.opponentType) {
 
@@ -380,7 +381,7 @@ var SettingZone = React.createClass({
                   <MessageList messages={this.props.game.messages} opponent_sid={this.props.game.me.opponent_sid} />
                 </div>
                 <form>
-                  <input id="chat-input" value={this.props.game.inputValue} onChange={this.changeHandler}></input>
+                  <input id="chat-input" value={this.props.game.inputValue} onChange={this.changeValue}></input>
                   <input id="send-msg" value="Send" type="button" onClick={this.handleSendMsg}></input>
                 </form>
               </div>
@@ -622,7 +623,7 @@ var Connect4 = React.createClass({
       if ( value === "robot"){
 
         //that.state.game.connected = false;
-        console.log("-opponent-:",that.state.game.opponent);
+        //console.log("-opponent-:",that.state.game.opponent);
         socket.emit('leaveGame');
         that.state.game.me = {};
         that.state.game.opponent = {};
@@ -684,10 +685,6 @@ var Connect4 = React.createClass({
                 this.forceUpdate();  
               }else{
                 this.state.game.turn = 1;
-                //get actual connect 4 game position in string notation       
-                var pos = C4Fct.arrayToString(this.state.game.position);
-                //console.log("pos=",pos);
-
                 //get the solution from Pascal Pons "alpha beta pruning" algorithm 
                 C4Fct.computerMove(this);
               }
