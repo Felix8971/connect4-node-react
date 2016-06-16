@@ -144,7 +144,7 @@ describe('testWin', function(){
 	});
 
 
-	it('should draw unicorn');//à ecrire
+	it('5. should not win');//à ecrire
 
 });
 
