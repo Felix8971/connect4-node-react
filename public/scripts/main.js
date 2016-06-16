@@ -3,7 +3,7 @@
 
 import "../css/gh-fork-ribbon.min.css";//fork me on github bande
 import "../css/style.css";
-//require("../images/board.svg");
+import "../images/board.svg";
 //require("../css/css/font-awesome.min.css");
 //require("../css/css/gh-fork-ribbon.min.css");
 
@@ -13,6 +13,11 @@ var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
 var debug = false;
+
+//Remove pre-loading message
+var elem = document.getElementById('pre-loading');
+elem.parentNode.removeChild(elem);
+
 
 var MenuBar = React.createClass({
     getInitialState: function(){
@@ -186,12 +191,16 @@ var NextTurnDisplay = React.createClass({
         var opponentPseudo = this.props.game.opponent.pseudo;
         break;
       default:
-          alert("error");
+        alert("error");
     }     
+
+    var classe = opponentPseudo ? '' : 'hidden';
+    classe += ' pseudos';
+
     return (
-      <div id="nextTurnDisplay">
-        <div className="pseudos">
-          <div id="me" >{myPseudo}
+      <div id="nextTurnDisplay" >
+        <div className="pseudos" className={classe}>
+          <div id="me">{myPseudo}
             <div className={classNames[myTurnId]}></div>
           </div>
           |
@@ -727,7 +736,7 @@ var Connect4 = React.createClass({
           this.state.game.lastMove.blink = false;
 
           //console.log('lastMove=',lastMove); //console.log('game=',game); 
-          socket.emit('addDisc',col);//tell server to tell my opponent that i add a disc on column col
+          socket.emit('addDisc',col);//ask server to tell my opponent that i'm adding a disc on column col
           this.state.game.nbMove++;
           this.forceUpdate();
 

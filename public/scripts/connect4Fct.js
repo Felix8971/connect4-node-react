@@ -122,7 +122,7 @@ var C4Fct = {
   infoFromLevel : {
     "easy": { 
       img:"R2D2.png",
-      speech:"bip bip...",
+      speech:"01001000 01101001 00100001...",
       rankToPLayFromLevelAndNbrChoices:[0,0,1,2,3,4,5]
     },
     "normal":{
@@ -137,22 +137,22 @@ var C4Fct = {
     },
     "very hard":{ 
       img:"HAL9000.png", 
-      speech:"Dave, this conversation can serve no purpose anymore. Goodbye",//My mind is going... I can feel it
+      speech:"Dave, this conversation can serve no purpose anymore. Goodbye.",//My mind is going... I can feel it
       rankToPLayFromLevelAndNbrChoices:[0,0,0,0,0,0,0]   
     },
   },
 
   /**
-    * get the solution from server with Pascal Pons "alpha beta pruning" algorithm (cf. game.url)
+    * get the solution from Pascal Pons's server with  "alpha beta pruning" algorithm (cf. game.url)
     * and make the computer play 
   **/
 
-  computerMove: function(_this){
-    var game = _this.state.game;
+  computerMove: function(that){
+    var game = that.state.game;
     var pos = C4Fct.arrayToString(game.position);
     //var pos ="32";//console.log('pos=',pos);
     var options = {  
-      method: 'GET'
+      method: 'GET' 
     };
 
     fetch(game.urlSolver+"pos="+pos, options).then(function(res) {
@@ -175,16 +175,16 @@ var C4Fct = {
       //columnPlayed = C4Fct.getRandomElementInArray(stat[n-1].positions);
       columnPlayed = C4Fct.getRandomElementInArray(stat[rank].positions);
      
-      _this.state.game.turn = 1;
+      that.state.game.turn = 1;
 
       var lastMove = C4Fct.addDisc(game, columnPlayed);
-      _this.state.game.lastMove = lastMove;
-      _this.state.game.lastMove.blink = true;
+      that.state.game.lastMove = lastMove;
+      that.state.game.lastMove.blink = true;
       game.nbMove++;
       
       //we update the game state
-      _this.forceUpdate();    
-      //_this.setState({ game : game });
+      that.forceUpdate();    
+      //that.setState({ game : game });
 
       var win = C4Fct.testWin(game, lastMove);
 
@@ -193,15 +193,15 @@ var C4Fct = {
         game.turn = null;     
         alert("You loose!");
       }else{//pass turn to user
-        if ( this.state.game.nbMove == 42 ){
+        if ( that.state.game.nbMove === 42 ){
           alert("draw 0-0 !");
         }
         game.turn = 2;
-        //this.state.game.turn = 2;             
+        //that.state.game.turn = 2;             
       }
-      //_this.setState({ game : game }); 
-      _this.forceUpdate();          
-    }.bind(_this) )
+      //that.setState({ game : game }); 
+      that.forceUpdate();          
+    }.bind(that) )
     .catch(function(error) {
       console.log('There has been a problem with your fetch operation 4: ' + error.message);
     });
@@ -210,7 +210,7 @@ var C4Fct = {
 
 
   /**
-   * Try to add a disc on the game's grid,  
+   * Try to add a disc at a given column on the game's grid,  
    * if it's possible we update the game object
   **/  
   addDisc: function(game, col){
@@ -229,6 +229,28 @@ var C4Fct = {
     }        
   },
 
+
+  /**
+   * Try to remove a disc at a given column from the game's grid,  
+  **/  
+  removeDisc: function(game, col){
+    var canRemoveDisc = false;
+    //we go from top to bottom of connect4's board searching for a disc (with column=col)
+    for(var line=0;line<6;line++){
+      if ( game.grid[col][line] > 0 ){
+        canRemoveDisc = true;
+        game.grid[col][line] = 0;
+        game.position.pop();//Remove the last element of the array     
+        return {col:col,line:line, turn:3-game.turn, blink:false};
+      }
+    }
+    if ( !canRemoveDisc ){ 
+      return false;
+    }        
+  },
+
+
+
   // test_generic : function(use1, a , b, use2, c, d, e, f, game, lastMove, optionCheck){
   //   for(var k=1;k<=3;k++){
   //     if ( (use1 || (lastMove.col + a*k >= b)) && (use2 || (lastMove.line + c*k >= d)) ){
@@ -245,7 +267,7 @@ var C4Fct = {
   // },
 
   //Check if the last move win (i.e. at least four pieces connected)
-  testWin: function(game, lastMove){//if optionCheck is true we record the aligned discs in game.aligned matrix
+  testWin: function(game, lastMove){//we will record the aligned discs in game.aligned matrix
 
     var count = function(nbAlignedDisc, game){
       //count both direction
@@ -379,6 +401,8 @@ var C4Fct = {
       return true;
     } else if ( test_alignment_NE(game, lastMove) ){
       return true;
+    } else {
+      return false;
     }
 
   },
@@ -412,6 +436,14 @@ var C4Fct = {
       console.log('There has been a problem with your fetch operation 2: ' + error.message);
     }); 
   },
+
+  //for asynchronous test with mocha
+  test: function(callback){
+    setTimeout(function(){
+      callback();       
+    },500); 
+  },
+
 
 };
 

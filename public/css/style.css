@@ -46,7 +46,7 @@ html, body{
   width:100%;
   height:100%;
   margin:0;
-  background-color: #D4D4E4;
+  background-color: #e0e0e0;
   font-family: 'acmeregular';
 } 
 
@@ -58,6 +58,18 @@ html, body{
   font-style: normal;
 }
 
+#pre-loading{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform:    translate(-50%, -50%);
+  -ms-transform:     translate(-50%, -50%);
+  -o-transform:      translate(-50%, -50%);
+  transform: translate(-50%, -50%);    
+  z-index: 10;
+  font-size: 1.5em;
+}
 
 #loading {
    width: 100%;
@@ -85,27 +97,23 @@ html, body{
   width:50px;
 }
 
-#menuBar{
-    list-style:none;
-    display: inline-block;
-}
-
 #menuBar a{
   display: inline-block;
+  list-style:none;
   padding: 10px 20px;
   cursor:pointer;
-  background-color:#eee;
+  background-color:#e0e0e0;
   color:black;
   transition:0.3s;
-}
-
-#menuBar a:hover{
-  background-color:#90C2FB;
 }
 
 #menuBar a {
   color: black;
   text-decoration: none;
+}
+
+#menuBar a:hover{
+  background-color:#90C2FB;
 }
 
 #menuBar a.focused {
@@ -122,7 +130,7 @@ html, body{
 #menuBar{
   width:100%;
   margin:auto;
-  background-color: #D4D4E4;  
+  background-color: #e0e0e0;  
   text-align: center;
   border-bottom:1px solid #AFAFC5;
   padding-bottom:10px;
@@ -153,7 +161,7 @@ html, body{
   width:80%;
   height:100%;
   margin:auto;
-  background-color: #D3D3E4;
+  background-color: #e0e0e0;
   /*border-left: 1px solid #AFAFC5;
   border-right: 1px solid #AFAFC5;*/
   /*text-align: center;*/
@@ -304,7 +312,7 @@ hr{
 #grid{
   display:inline-block;
   width:50%;
-  background-color: #D3D3E4;
+  background-color: #e0e0e0;
   text-align: center;
   vertical-align: top;
   position:absolute;
@@ -372,6 +380,13 @@ hr{
   /*z-index:2;*/
 }
 
+.boardImg2{
+  background-image: url(../images/board.svg);
+  background-repeat: no-repeat;
+  width:0%;
+  opacity:0;
+}
+
 .noDisc{
   background-color: white;
   z-index:1;
@@ -427,7 +442,7 @@ hr{
   width: 50%;
   height: 30px;
   z-index:2;
-  background-color: #D3D3E4;
+  background-color: #e0e0e0;
 }
 
 .pseudos{
@@ -611,6 +626,11 @@ input[type=radio].css-checkbox + label.css-label {
   font-size:20px;
   vertical-align:middle;
   cursor:pointer;
+}
+
+
+.hidden{
+  visibility:hidden;
 }
 
 input[type=radio].css-checkbox:checked + label.css-label {
