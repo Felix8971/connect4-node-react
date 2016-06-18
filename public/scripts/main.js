@@ -8,15 +8,11 @@ import "../images/board.svg";
 //require("../css/css/gh-fork-ribbon.min.css");
 
 var socket = io();
-var React = require('react');
+//var React = require('react');
 var About = require('./about.js');
 var Contact = require('./contact.js');
 var C4Fct = require('./connect4Fct.js');
 var debug = false;
-
-//Remove pre-loading message
-var elem = document.getElementById('pre-loading');
-elem.parentNode.removeChild(elem);
 
 
 var MenuBar = React.createClass({
@@ -413,6 +409,7 @@ var Connect4 = React.createClass({
 
   //componentDidMount is a method called automatically by React after a component is rendered for the first time. 
   componentDidMount: function() {
+    
     var self = this;
     if ( self.state.game.opponentType === "robot"){
     //that.state.game.turn = 1 + Math.floor(2*Math.random());// 1 or 2 randomely (tells us who is going to play by is code)
@@ -861,6 +858,14 @@ var Debug = React.createClass({
 
 //What gets displayed inside App is controlled by the result of this.props.children instead of a hard-coded component.
 var App = React.createClass({
+  componentDidMount: function() {
+    //Remove pre-loading message
+    var elem = document.getElementById('pre-loading');
+    if ( elem ){ 
+      elem.style.display = 'none';
+      //elem.parentNode.removeChild(elem);
+    }
+  },
 
   render: function() {
     var items = [

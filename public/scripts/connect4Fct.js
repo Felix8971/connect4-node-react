@@ -1,4 +1,6 @@
 
+var _ = require("lodash");//underscore with more stuff
+
 var C4Fct = {
   
   //urlConnect4MP : "http://localhost:8080", //"http://www.felixdebon.fr", //dev
@@ -154,6 +156,8 @@ var C4Fct = {
     var options = {  
       method: 'GET' 
     };
+
+//ReferenceError: Can't find variable: fetch iphone !!
 
     fetch(game.urlSolver+"pos="+pos, options).then(function(res) {
       return res.json();

@@ -3,8 +3,8 @@ var React = require('react');
 module.exports = React.createClass({
   render: function() {
       return (
-        <div className="content about" >
-          <h2 className="sub-title">CONTACT</h2>
+        <div className="content contact" >
+          <h1 className="title">CONTACT</h1>
           <p className="pg">
             My name is Félix DEBON, I&#39;m a Javascript web developer based in Paris.<br/><br/>  
             You can see my works <a href="http://felixdebon.com/portfolio/" target="_blank" >here</a>.<br/><br/> 
