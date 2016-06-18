@@ -50,7 +50,7 @@ test.describe('e2e: Landing page connect 4', function() {
 		
     	//driver.sleep(15000);//not good
 
-    	 // Test to ensure we can play are on the home page by checking the menuBar id attribute
+    	// Test to ensure we can play the game
     	setTimeout(function(){
 			var i = 0;
 			var id = setInterval(function(){
