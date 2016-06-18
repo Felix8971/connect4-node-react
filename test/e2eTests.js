@@ -4,6 +4,7 @@ selenium = require('selenium-webdriver');
 //LandingPage =  require('./landing-page.js');
 var until = selenium.until;
 var by = selenium.By;
+var expect    = require("chai").expect;//des trucs en plus du assert de node js 
 const mochaTimeOut = 60000;
 
 //Doc --> 
@@ -29,23 +30,27 @@ test.after(function() {
 });
 
 
-// Test to ensure we are on the home page by checking the menuBar id attribute
+
 test.describe('e2e: Landing page connect 4', function() {
     
 	this.retries(4);// Retry all tests in this suite up to 4 times
     this.timeout(mochaTimeOut);
+
     test.it('menuBar id exist', function(done) {
     	console.log('-----');
+	     // Test to ensure we are on the home page by checking the menuBar id attribute
 	    driver.isElementPresent(selenium.By.id('menuBar')).then(function(present) {
 	      assert.equal(present, true,'no menubar id found');
 	    });
 	    
 	    driver.isElementPresent(selenium.By.id('mask-col-0')).then(function(present) {
 	      assert.equal(present, true,'no mask-col-0 found');
-	      console.log('found!');
+	      //console.log('found!');
 	    });
 		
     	//driver.sleep(15000);//not good
+
+    	 // Test to ensure we can play are on the home page by checking the menuBar id attribute
     	setTimeout(function(){
 			var i = 0;
 			var id = setInterval(function(){
@@ -54,6 +59,13 @@ test.describe('e2e: Landing page connect 4', function() {
 				i++;
 				if ( i === 7 ){ 
 					clearInterval(id);
+					driver.executeScript(function() {
+						return document.getElementsByClassName('redDisc').length
+					}).then(function(n) {
+						//check n here 
+						console.log(n);
+						expect(n).to.be.above(5);
+					});					
 					done();//pour passer à la suite 
 				}
 			},2000);
