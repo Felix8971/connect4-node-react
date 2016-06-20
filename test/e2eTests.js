@@ -74,6 +74,20 @@ test.describe('e2e: Landing page connect 4', function() {
 		//done();//pour passer à la suite 
     });
 
+
+// à tester !
+    // // Test the navigation bar by clicking on the 'REVIEW' link and checking the URL changes to '/review'
+    // it('Has a working nav', function(done) {
+    //     var element = this.driver.findElement(selenium.By.linkText('REVIEW'));
+
+    //     element.click();
+
+    //     this.driver.getCurrentUrl().then(function(value) {
+    //         expect(value).toContain('/review');
+    //         done();
+    //     });
+    // });
+
     test.it('go to about page', function() {
     	var selector = '#menuBar > a:nth-child(2)';
 		driver.findElement(selenium.By.css(selector)).click().then(function() {
