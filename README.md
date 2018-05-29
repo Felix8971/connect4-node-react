@@ -27,7 +27,7 @@ This game used the "alpha beta pruning" algorithm created by Pascal Pons (https:
 Email me on felix8971@hotmail.com or [open an issue](https://github.com/felix8971/connect4-node-react
 /issues).
 
-The sole purpose of this project is to practice (and learn) my skills in ReactJS, please be kind :)
+The sole purpose of this project was to practice (and learn) ReactJS, please be kind :)
 
 ===
 
