@@ -32,7 +32,3 @@ The sole purpose of this project is to practice (and learn) my skills in ReactJS
 ===
 
 ![alt tag](http://felixdebon.com/connect4/public/images/connect4Image1.png)
-
-===
-
-![alt tag](http://felixdebon.com/connect4/public/images/connect4Image2.png)
