@@ -31,4 +31,4 @@ The sole purpose of this project was to practice (and learn) ReactJS, please be 
 
 ===
 
-![alt tag](http://felixdebon.com/connect4/public/images/connect4Image1.png)
+![alt tag](http://felixdebon.com/portfolio/images/connect4-1.jpg)
